@@ -4,10 +4,16 @@
 	"scripts": {
 		"build": "turbo run build",
 		"dev": "turbo run dev",
-		"lint": "turbo run lint",
-		"format": "biome format",
-		"check-types": "turbo run check-types",
-		"feature:create": "./scripts/create-feature.sh"
+		"build:web": "turbo build --filter=web",
+		"lint": "turbo lint",
+		"lint:fix": "turbo lint:fix",
+		"format": "biome format --write",
+		"typecheck": "turbo typecheck",
+		"test": "turbo test",
+		"test:watch": "turbo test:watch",
+		"validate": "turbo typecheck && turbo lint && turbo test",
+		"install:deps": "bun install",
+		"clean": "turbo clean"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "2.5.10",
