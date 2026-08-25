@@ -1,159 +1,128 @@
-# Turborepo starter
+# Brooklyn Restaurant
 
-This Turborepo starter is maintained by the Turborepo core team.
+> RAW. FAST. AUTHENTIC.
 
-## Using this example
+Plataforma web para Brooklyn Fast Food — pedidos en línea, menú digital y eventos.
 
-Run the following command:
+## Arquitectura
 
-```sh
-npx create-turbo@latest
+```
+brooklyn-restaurant/
+├── apps/
+│   └── web/                    # Next.js 16 (App Router)
+│       ├── app/                # Routes y layouts
+│       ├── src/
+│       │   ├── features/       # Vertical Slice (features)
+│       │   │   └── landing/    # Landing page
+│       │   │       ├── components/
+│       │   │       ├── hooks/
+│       │   │       ├── actions/
+│       │   │       ├── services/
+│       │   │       └── types/
+│       │   └── shared/         # Componentes compartidos
+│       │       └── components/ # Header, Footer, Layout
+│       └── public/             # Assets estáticos
+├── packages/                   # Paquetes compartidos
+├── scripts/                    # Scripts de utilería
+└── turbo.json                  # Configuración de Turborepo
 ```
 
-## What's inside?
+**Patrón:** Vertical Slice Architecture — cada feature encapsula sus componentes, hooks, acciones, servicios y tipos de forma independiente.
 
-This Turborepo includes the following packages/apps:
+## Tecnologías
 
-### Apps and Packages
+| Categoría | Tecnología | Versión |
+|-----------|------------|---------|
+| **Runtime** | Bun | 1.4.0 |
+| **Framework** | Next.js | 16.3.0 |
+| **UI Library** | React | 19.2.0 |
+| **Componentes** | HeroUI | 3.2.4 |
+| **Estilos** | Tailwind CSS | 4.3.3 |
+| **State** | Zustand | 5.0.15 |
+| **Validación** | Valibot | 1.4.2 |
+| **HTTP** | Axios | 1.19.0 |
+| **Testing** | Vitest + Cypress | — |
+| **Linting** | Biome | 2.5.10 |
+| **Monorepo** | Turborepo | 2.10.11 |
+| **Tipado** | TypeScript | 5.9.2 |
 
-- `docs`: a [Next.js](https://nextjs.org/) app
-- `web`: another [Next.js](https://nextjs.org/) app
-- `@repo/ui`: a stub React component library shared by both `web` and `docs` applications
-- `@repo/eslint-config`: `eslint` configurations (includes `eslint-config-next` and `eslint-config-prettier`)
-- `@repo/typescript-config`: `tsconfig.json`s used throughout the monorepo
+## Instalación
 
-Each package/app is 100% [TypeScript](https://www.typescriptlang.org/).
+### Requisitos
 
-### Utilities
+- [Bun](https://bun.sh) >= 1.4.0
+- [Node.js](https://nodejs.org) >= 18
 
-This Turborepo has some additional tools already setup for you:
+### Pasos
 
-- [TypeScript](https://www.typescriptlang.org/) for static type checking
-- [ESLint](https://eslint.org/) for code linting
-- [Prettier](https://prettier.io) for code formatting
+```bash
+# Clonar el repositorio
+git clone https://github.com/tu-usuario/brooklyn-restaurant.git
+cd brooklyn-restaurant
 
-### Build
+# Instalar dependencias
+bun install
 
-To build all apps and packages, run the following command:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo build
+# Iniciar desarrollo
+bun dev
 ```
 
-Without global `turbo`, use your package manager:
+El servidor de desarrollo estará disponible en [http://localhost:3000](http://localhost:3000).
 
-```sh
-cd my-turborepo
-npx turbo build
-bun dlx turbo build
-bun exec turbo build
+### Comandos disponibles
+
+| Comando | Descripción |
+|---------|-------------|
+| `bun dev` | Inicia todos los apps en modo desarrollo |
+| `bun build` | Construye todos los apps |
+| `bun lint` | Verifica código con Biome |
+| `bun check-types` | Valida tipos TypeScript |
+| `bun feature:create <name>` | Crea una nueva feature Vertical Slice |
+
+### Crear una feature
+
+```bash
+# Desde la raíz del proyecto
+bun feature:create menu-items
+
+# Esto crea:
+# apps/web/src/features/menu-items/
+# ├── components/
+# ├── hooks/
+# ├── actions/
+# ├── services/
+# ├── types/
+# └── index.ts
 ```
 
-You can build a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
+## Estructura de una Feature
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo build --filter=docs
+```
+feature-name/
+├── components/    # Componentes React (UI)
+├── hooks/         # Custom hooks
+├── actions/       # Server Actions ("use server")
+├── services/      # Capa de datos / API
+├── types/         # Interfaces TypeScript
+└── index.ts       # Barrel export
 ```
 
-Without global `turbo`:
+## Paleta de Colores
 
-```sh
-npx turbo build --filter=docs
-bun exec turbo build --filter=docs
-bun exec turbo build --filter=docs
-```
+| Token | Valor | Uso |
+|-------|-------|-----|
+| `--background` | `#000000` | Fondo principal |
+| `--foreground` | `#ffffff` | Texto principal |
+| `--accent` | `#fd9d08` | Mustard — botones, links, focus |
+| `--surface` | `#1a1a1a` | Tarjetas, paneles |
+| `--border` | `#333333` | Bordes |
+| `--muted` | `#888888` | Texto secundario |
 
-### Develop
+## Tipografía
 
-To develop all apps and packages, run the following command:
+- **Fuente principal:** Texturina (Google Fonts)
+- **Pesos:** 400 (regular), 700 (bold)
 
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
+## Licencia
 
-```sh
-cd my-turborepo
-turbo dev
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo dev
-bun exec turbo dev
-bun exec turbo dev
-```
-
-You can develop a specific package by using a [filter](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters):
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo dev --filter=web
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo dev --filter=web
-bun exec turbo dev --filter=web
-bun exec turbo dev --filter=web
-```
-
-### Remote Caching
-
-> [!TIP]
-> Vercel Remote Cache is free for all plans. Get started today at [vercel.com](https://vercel.com/signup?utm_source=remote-cache-sdk&utm_campaign=free_remote_cache).
-
-Turborepo can use a technique known as [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching) to share cache artifacts across machines, enabling you to share build caches with your team and CI/CD pipelines.
-
-By default, Turborepo will cache locally. To enable Remote Caching you will need an account with Vercel. If you don't have an account you can [create one](https://vercel.com/signup?utm_source=turborepo-examples), then enter the following commands:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed (recommended):
-
-```sh
-cd my-turborepo
-turbo login
-```
-
-Without global `turbo`, use your package manager:
-
-```sh
-cd my-turborepo
-npx turbo login
-bun exec turbo login
-bun exec turbo login
-```
-
-This will authenticate the Turborepo CLI with your [Vercel account](https://vercel.com/docs/concepts/personal-accounts/overview).
-
-Next, you can link your Turborepo to your Remote Cache by running the following command from the root of your Turborepo:
-
-With [global `turbo`](https://turborepo.dev/docs/getting-started/installation#global-installation) installed:
-
-```sh
-turbo link
-```
-
-Without global `turbo`:
-
-```sh
-npx turbo link
-bun exec turbo link
-bun exec turbo link
-```
-
-## Useful Links
-
-Learn more about the power of Turborepo:
-
-- [Tasks](https://turborepo.dev/docs/crafting-your-repository/running-tasks)
-- [Caching](https://turborepo.dev/docs/crafting-your-repository/caching)
-- [Remote Caching](https://turborepo.dev/docs/core-concepts/remote-caching)
-- [Filtering](https://turborepo.dev/docs/crafting-your-repository/running-tasks#using-filters)
-- [Configuration Options](https://turborepo.dev/docs/reference/configuration)
-- [CLI Usage](https://turborepo.dev/docs/reference/command-line-reference)
+Privado — © 2024 Brooklyn Fast Food
