@@ -1,0 +1,88 @@
+{
+	"$schema": "https://biomejs.dev/schemas/2.5.10/schema.json",
+	"vcs": {
+		"enabled": true,
+		"clientKind": "git",
+		"useIgnoreFile": true
+	},
+	"files": {
+		"ignoreUnknown": false,
+		"includes": ["**", "!node_modules", "!dist", "!coverage"]
+	},
+	"formatter": {
+		"enabled": true,
+		"indentStyle": "tab",
+		"indentWidth": 2,
+		"lineWidth": 80,
+		"lineEnding": "lf"
+	},
+	"linter": {
+		"enabled": true,
+		"rules": {
+			"suspicious": {
+				"noConsole": "warn",
+				"useAwait": "error",
+				"useErrorMessage": "error",
+				"noExplicitAny": "warn",
+				"noDoubleEquals": "error"
+			},
+			"style": {
+				"useImportType": "error",
+				"noNonNullAssertion": "warn",
+				"useConst": "error",
+				"useEnumInitializers": "error"
+			},
+			"correctness": {
+				"noUnusedVariables": "error",
+				"noUnusedImports": "error",
+				"noUnusedFunctionParameters": "warn",
+				"useExhaustiveDependencies": "error",
+				"useHookAtTopLevel": "error"
+			},
+			"security": {
+				"noDangerouslySetInnerHtml": "error"
+			}
+		}
+	},
+	"javascript": {
+		"formatter": {
+			"quoteStyle": "double",
+			"semicolons": "always",
+			"trailingCommas": "all",
+			"arrowParentheses": "always"
+		}
+	},
+	"assist": {
+		"enabled": true,
+		"actions": {
+			"source": {
+				"organizeImports": {
+					"level": "on",
+					"options": {
+						"groups": [
+							[
+								"express",
+								"express/**",
+								"cors",
+								"cors/**",
+								"helmet",
+								"helmet/**"
+							],
+							":BLANK_LINE:",
+							[
+								"@domain/**",
+								"@application/**",
+								"@infrastructure/**",
+								"@interfaces/**"
+							],
+							":BLANK_LINE:",
+							["@/**"],
+							":BLANK_LINE:",
+							["bun:test", "node:*"]
+						]
+					}
+				}
+			}
+		}
+	}
+}
