@@ -27,6 +27,12 @@ out/
 build
 dist
 
+# Database
+*.db
+*.db-journal
+
+# Prisma
+apps/api/prisma/migrations/
 
 # Debug
 npm-debug.log*

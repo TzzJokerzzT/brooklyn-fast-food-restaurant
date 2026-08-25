@@ -12,6 +12,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "test:coverage": "vitest run --coverage",
     "clean": "rm -rf .next node_modules"
   },
   "dependencies": {
@@ -30,10 +31,15 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.10",
+    "@testing-library/jest-dom": "^7.0.1",
+    "@testing-library/react": "^16.3.2",
+    "@testing-library/user-event": "^14.6.6",
     "@types/node": "^22.15.3",
     "@types/react": "19.2.2",
     "@types/react-dom": "19.2.2",
+    "@vitejs/plugin-react": "^6.1.0",
     "eslint": "^9.39.1",
+    "jsdom": "^30.0.1",
     "typescript": "5.9.2",
     "vitest": "^4.1.11"
   }
