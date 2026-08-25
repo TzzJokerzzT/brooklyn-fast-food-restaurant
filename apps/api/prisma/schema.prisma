@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── User & Auth ──────────────────────────────────────────────
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String
+  role      String   @default("customer") // customer, admin, staff
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  reservations Reservation[]
+  orders       Order[]
+
+  @@map("users")
+}
+
+// ── Menu ─────────────────────────────────────────────────────
+model Category {
+  id          String   @id @default(cuid())
+  name        String   @unique
+  description String?
+  sortOrder   Int      @default(0)
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  items MenuItem[]
+
+  @@map("categories")
+}
+
+model MenuItem {
+  id          String   @id @default(cuid())
+  name        String
+  description String?
+  price       Float
+  image       String?
+  isAvailable Boolean  @default(true)
+  isFeatured  Boolean  @default(false)
+  sortOrder   Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  categoryId String
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  orderItems OrderItem[]
+
+  @@map("menu_items")
+}
+
+// ── Orders ───────────────────────────────────────────────────
+model Order {
+  id            String   @id @default(cuid())
+  status        String   @default("pending") // pending, confirmed, preparing, ready, delivered, cancelled
+  total         Float
+  notes         String?
+  tableNumber   Int?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  items OrderItem[]
+
+  @@map("orders")
+}
+
+model OrderItem {
+  id       String @id @default(cuid())
+  quantity Int    @default(1)
+  price    Float
+
+  orderId    String
+  order      Order    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  menuItemId String
+  menuItem   MenuItem @relation(fields: [menuItemId], references: [id])
+
+  @@map("order_items")
+}
+
+// ── Reservations ─────────────────────────────────────────────
+model Reservation {
+  id          String   @id @default(cuid())
+  date        DateTime
+  time        String
+  guests      Int
+  status      String   @default("pending") // pending, confirmed, cancelled
+  notes       String?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  userId String
+  user   User @relation(fields: [userId], references: [id])
+
+  @@map("reservations")
+}
+
+// ── Events ───────────────────────────────────────────────────
+model Event {
+  id          String   @id @default(cuid())
+  title       String
+  description String?
+  date        DateTime
+  time        String
+  image       String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("events")
+}

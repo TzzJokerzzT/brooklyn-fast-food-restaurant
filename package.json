@@ -1,41 +1,45 @@
 {
-	"name": "brooklyn-restaurant",
-	"private": true,
+  "name": "brooklyn-restaurant",
+  "private": true,
 	"scripts": {
 		"build": "turbo run build",
 		"dev": "turbo run dev",
+		"dev:web": "turbo dev --filter=web",
+		"dev:api": "turbo dev --filter=api",
 		"build:web": "turbo build --filter=web",
+		"build:api": "turbo build --filter=api",
 		"lint": "turbo lint",
 		"lint:fix": "turbo lint:fix",
 		"format": "biome format --write",
 		"typecheck": "turbo typecheck",
 		"test": "turbo test",
 		"test:watch": "turbo test:watch",
+		"test:coverage": "turbo test:coverage",
 		"validate": "turbo typecheck && turbo lint && turbo test",
 		"install:deps": "bun install",
 		"clean": "turbo clean"
 	},
-	"devDependencies": {
-		"@biomejs/biome": "2.5.10",
-		"simple-git-hooks": "^2.13.1",
-		"turbo": "^2.10.11",
-		"typescript": "5.9.2"
-	},
-	"engines": {
-		"node": ">=18"
-	},
-	"devEngines": {
-		"packageManager": {
-			"name": "bun",
-			"version": "1.4.0"
-		}
-	},
-	"workspaces": [
-		"apps/*"
-	],
-	"simple-git-hooks": {
-		"pre-commit": "bunx biome check --write --staged",
-		"commit-msg": "sh scripts/commit-lint.sh $1",
-		"pre-push": "sh scripts/pre-push.sh"
-	}
+  "devDependencies": {
+    "@biomejs/biome": "2.5.10",
+    "simple-git-hooks": "^2.13.1",
+    "turbo": "^2.10.11",
+    "typescript": "5.9.2"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devEngines": {
+    "packageManager": {
+      "name": "bun",
+      "version": "1.4.0"
+    }
+  },
+  "workspaces": [
+    "apps/*"
+  ],
+  "simple-git-hooks": {
+    "pre-commit": "bunx biome check --write --staged",
+    "commit-msg": "sh scripts/commit-lint.sh $1",
+    "pre-push": "sh scripts/pre-push.sh"
+  }
 }
