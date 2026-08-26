@@ -38,6 +38,8 @@ router.post("/login", validateLogin, async (req, res) =>
 router.post("/refresh", async (req, res) => authController.refresh(req, res));
 
 // Protected routes
-router.get("/me", authenticate, async (req, res) => authController.me(req, res));
+router.get("/me", authenticate, async (req, res) =>
+	authController.me(req, res),
+);
 
 export { router as authRouter };
