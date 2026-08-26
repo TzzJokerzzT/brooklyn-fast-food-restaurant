@@ -27,17 +27,17 @@ const authService = new AuthService(
 const authController = new AuthController(authService, userRepository);
 
 // Public routes
-router.post("/register", validateRegister, (req, res) =>
+router.post("/register", validateRegister, async (req, res) =>
 	authController.register(req, res),
 );
 
-router.post("/login", validateLogin, (req, res) =>
+router.post("/login", validateLogin, async (req, res) =>
 	authController.login(req, res),
 );
 
-router.post("/refresh", (req, res) => authController.refresh(req, res));
+router.post("/refresh", async (req, res) => authController.refresh(req, res));
 
 // Protected routes
-router.get("/me", authenticate, (req, res) => authController.me(req, res));
+router.get("/me", authenticate, async (req, res) => authController.me(req, res));
 
 export { router as authRouter };
