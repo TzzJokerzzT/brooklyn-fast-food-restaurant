@@ -64,9 +64,11 @@ export class AuthService implements IAuthService {
 
     // Create user with default role
     const user = await this.userRepository.create({
+      userName: data.userName,
+      lastName: data.lastName,
       email: data.email,
-      name: data.name,
       password: hashedPassword,
+      address: data.address,
       role: UserRole.CLIENTS,
     });
 

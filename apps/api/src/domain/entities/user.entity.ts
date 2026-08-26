@@ -9,9 +9,11 @@ export enum UserRole {
 
 export interface User {
   id: string;
+  userName: string;
+  lastName: string;
   email: string;
-  name: string;
   role: UserRole;
+  address: string | null;
   isActive: boolean;
   lastLoginAt: Date | null;
   createdAt: Date;
@@ -19,24 +21,30 @@ export interface User {
 }
 
 export interface CreateUserDTO {
+  userName: string;
+  lastName: string;
   email: string;
-  name: string;
   password: string;
+  address?: string;
   role?: UserRole;
 }
 
 export interface UpdateUserDTO {
-  name?: string;
+  userName?: string;
+  lastName?: string;
   email?: string;
+  address?: string;
   role?: UserRole;
   isActive?: boolean;
 }
 
 export interface UserResponse {
   id: string;
+  userName: string;
+  lastName: string;
   email: string;
-  name: string;
   role: UserRole;
+  address: string | null;
   isActive: boolean;
   lastLoginAt: Date | null;
   createdAt: Date;
@@ -50,9 +58,11 @@ export interface LoginDTO {
 }
 
 export interface RegisterDTO {
+  userName: string;
+  lastName: string;
   email: string;
-  name: string;
   password: string;
+  address?: string;
 }
 
 export interface AuthTokens {
@@ -71,9 +81,11 @@ export interface TokenPayload {
 export function toUserResponse(user: User): UserResponse {
   return {
     id: user.id,
+    userName: user.userName,
+    lastName: user.lastName,
     email: user.email,
-    name: user.name,
     role: user.role,
+    address: user.address,
     isActive: user.isActive,
     lastLoginAt: user.lastLoginAt,
     createdAt: user.createdAt,

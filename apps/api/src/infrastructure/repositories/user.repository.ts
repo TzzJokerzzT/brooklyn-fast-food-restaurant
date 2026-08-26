@@ -15,9 +15,11 @@ const prisma = new PrismaClient();
 function mapPrismaUser(user: PrismaUser): User {
   return {
     id: user.id,
+    userName: user.userName,
+    lastName: user.lastName,
     email: user.email,
-    name: user.name,
     role: user.role as UserRole,
+    address: user.address,
     isActive: user.isActive,
     lastLoginAt: user.lastLoginAt,
     createdAt: user.createdAt,
@@ -51,7 +53,8 @@ export class UserRepository implements IUserRepository {
       ...(role && { role }),
       ...(search && {
         OR: [
-          { name: { contains: search } },
+          { userName: { contains: search } },
+          { lastName: { contains: search } },
           { email: { contains: search } },
         ],
       }),
@@ -73,9 +76,11 @@ export class UserRepository implements IUserRepository {
   async create(data: CreateUserDTO & { password: string }): Promise<User> {
     const user = await prisma.user.create({
       data: {
+        userName: data.userName,
+        lastName: data.lastName,
         email: data.email,
-        name: data.name,
         password: data.password,
+        address: data.address,
         role: data.role || UserRole.CLIENTS,
       },
     });

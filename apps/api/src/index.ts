@@ -1,14 +1,15 @@
-import express, { type Express } from "express";
 import cors from "cors";
+import express, { type Express } from "express";
 import helmet from "helmet";
+
 import morgan from "morgan";
 import { env } from "./lib/env.js";
 import { authRouter } from "./presentation/routes/auth.routes.js";
 import { usersRouter } from "./presentation/routes/users.routes.js";
+import { eventsRouter } from "./routes/events.js";
 import { menuRouter } from "./routes/menu.js";
 import { ordersRouter } from "./routes/orders.js";
 import { reservationsRouter } from "./routes/reservations.js";
-import { eventsRouter } from "./routes/events.js";
 
 const app: Express = express();
 const PORT = env.PORT;
@@ -21,11 +22,11 @@ app.use(express.json({ limit: "10mb" }));
 
 // ── Health Check ──────────────────────────────────────────────
 app.get("/api/health", (_req, res) => {
-  res.json({
-    status: "ok",
-    version: "1.0.0",
-    timestamp: new Date().toISOString(),
-  });
+	res.json({
+		status: "ok",
+		version: "1.0.0",
+		timestamp: new Date().toISOString(),
+	});
 });
 
 // ── API v1 Routes ────────────────────────────────────────────
@@ -63,29 +64,36 @@ app.use("/api/events", eventsRouter);
 
 // ── 404 Handler ──────────────────────────────────────────────
 app.use((_req, res) => {
-  res.status(404).json({
-    error: "Not found",
-    message: "The requested endpoint does not exist",
-    documentation: "/api/health",
-  });
+	res.status(404).json({
+		error: "Not found",
+		message: "The requested endpoint does not exist",
+		documentation: "/api/health",
+	});
 });
 
 // ── Error Handler ─────────────────────────────────────────────
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error("Unhandled error:", err.stack);
+app.use(
+	(
+		err: Error,
+		_req: express.Request,
+		res: express.Response,
+		_next: express.NextFunction,
+	) => {
+		console.error("Unhandled error:", err.stack);
 
-  // Don't leak error details in production
-  const isProduction = env.NODE_ENV === "production";
+		// Don't leak error details in production
+		const isProduction = env.NODE_ENV === "production";
 
-  res.status(500).json({
-    error: "Internal server error",
-    ...(isProduction ? {} : { details: err.message }),
-  });
-});
+		res.status(500).json({
+			error: "Internal server error",
+			...(isProduction ? {} : { details: err.message }),
+		});
+	},
+);
 
 // ── Start Server ──────────────────────────────────────────────
 app.listen(PORT, () => {
-  console.log(`
+	console.log(`
 🚀 Brooklyn Restaurant API
 ━━━━━━━━━━━━━━━━━━━━━━━━━━
 🌐 Server:  http://localhost:${PORT}

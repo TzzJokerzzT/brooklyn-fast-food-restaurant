@@ -64,7 +64,7 @@ export class UsersController {
   // Create user (super-admin only)
   static async store(req: Request, res: Response): Promise<void> {
     try {
-      const { email, name, password, role } = req.body;
+      const { userName, lastName, email, password, address, role } = req.body;
 
       // Check if email exists
       const existingUser = await userRepository.findByEmail(email);
@@ -78,9 +78,11 @@ export class UsersController {
 
       // Create user
       const user = await userRepository.create({
+        userName,
+        lastName,
         email,
-        name,
         password: hashedPassword,
+        address,
         role: role || UserRole.CLIENTS,
       });
 
@@ -98,7 +100,7 @@ export class UsersController {
   static async update(req: Request, res: Response): Promise<void> {
     try {
       const { id } = req.params as { id: string };
-      const { name, email, role, isActive } = req.body;
+      const { userName, lastName, email, address, role, isActive } = req.body;
       const currentUser = req.user;
 
       // Check if user exists
@@ -131,8 +133,10 @@ export class UsersController {
 
       // Update user
       const updatedUser = await userRepository.update(id, {
-        ...(name && { name }),
+        ...(userName && { userName }),
+        ...(lastName && { lastName }),
         ...(email && { email }),
+        ...(address !== undefined && { address }),
         ...(role && { role }),
         ...(isActive !== undefined && { isActive }),
       });

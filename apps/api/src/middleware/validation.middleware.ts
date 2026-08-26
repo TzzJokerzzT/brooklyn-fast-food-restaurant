@@ -25,8 +25,9 @@ export const validate = (schema: ZodSchema) => {
 // ── Validation Schemas ───────────────────────────────────────
 
 export const registerSchema = z.object({
+  userName: z.string().min(2, "User name must be at least 2 characters"),
+  lastName: z.string().min(2, "Last name must be at least 2 characters"),
   email: z.string().email("Invalid email format"),
-  name: z.string().min(2, "Name must be at least 2 characters"),
   password: z
     .string()
     .min(8, "Password must be at least 8 characters")
@@ -34,6 +35,7 @@ export const registerSchema = z.object({
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       "Password must contain at least one lowercase, one uppercase, and one number"
     ),
+  address: z.string().optional(),
 });
 
 export const loginSchema = z.object({
@@ -42,8 +44,10 @@ export const loginSchema = z.object({
 });
 
 export const updateUserSchema = z.object({
-  name: z.string().min(2).optional(),
+  userName: z.string().min(2).optional(),
+  lastName: z.string().min(2).optional(),
   email: z.string().email().optional(),
+  address: z.string().optional(),
   role: z.enum(["super-admin", "admin", "clients"]).optional(),
   isActive: z.boolean().optional(),
 });

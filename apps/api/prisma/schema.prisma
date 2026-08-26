@@ -12,16 +12,18 @@ datasource db {
 
 // ── User & Auth ──────────────────────────────────────────────
 model User {
-  id             String    @id @default(cuid())
-  email          String    @unique
-  name           String
-  password       String
-  role           String    @default("clients") // super-admin, admin, clients
-  isActive       Boolean   @default(true)
-  refreshToken   String?
-  lastLoginAt    DateTime?
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
+  id           String    @id @default(cuid())
+  userName     String
+  lastName     String
+  email        String    @unique
+  password     String
+  role         String    @default("clients") // super-admin, admin, clients
+  address      String?
+  refreshToken String?
+  isActive     Boolean   @default(true)
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
 
   reservations Reservation[]
   orders       Order[]

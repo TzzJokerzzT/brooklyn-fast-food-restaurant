@@ -18,9 +18,15 @@ export class AuthController {
   // ── POST /auth/register ─────────────────────────────────────
   static async register(req: Request, res: Response): Promise<void> {
     try {
-      const { email, name, password } = req.body;
+      const { userName, lastName, email, password, address } = req.body;
 
-      const tokens = await authService.register({ email, name, password });
+      const tokens = await authService.register({
+        userName,
+        lastName,
+        email,
+        password,
+        address,
+      });
 
       res.status(201).json({
         message: "User registered successfully",
