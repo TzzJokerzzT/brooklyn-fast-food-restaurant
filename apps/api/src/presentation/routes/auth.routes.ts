@@ -1,27 +1,43 @@
 import { type Router as ExpressRouter, Router } from "express";
 
-import { authenticate } from "../../middleware/auth.middleware.js";
+import { UserRepository } from "@/infrastructure/repositories/user.repository";
+import { AuthService } from "@/infrastructure/services/auth.service";
+import { JWTService } from "@/infrastructure/services/jwt.service";
+import { PasswordService } from "@/infrastructure/services/password.service";
+import { authenticate } from "@/middleware/auth.middleware";
 import {
-	loginSchema,
-	refreshTokenSchema,
-	registerSchema,
-	validate,
-} from "../../middleware/validation.middleware.js";
-import { AuthController } from "../controllers/auth.controller.js";
+	validateLogin,
+	validateRegister,
+} from "@/middleware/validation.middleware";
+import { AuthController } from "@/presentation/controllers/auth.controller";
 
 // ── Auth Routes ──────────────────────────────────────────────
-// /api/v1/auth/*
 
-export const authRouter: ExpressRouter = Router();
+const router: ExpressRouter = Router();
+
+// Create dependencies
+const userRepository = new UserRepository();
+const passwordService = new PasswordService();
+const jwtService = new JWTService();
+const authService = new AuthService(
+	userRepository,
+	passwordService,
+	jwtService,
+);
+const authController = new AuthController(authService, userRepository);
 
 // Public routes
-authRouter.post("/register", validate(registerSchema), AuthController.register);
-authRouter.post("/login", validate(loginSchema), AuthController.login);
-authRouter.post(
-	"/refresh",
-	validate(refreshTokenSchema),
-	AuthController.refreshToken,
+router.post("/register", validateRegister, (req, res) =>
+	authController.register(req, res),
 );
 
+router.post("/login", validateLogin, (req, res) =>
+	authController.login(req, res),
+);
+
+router.post("/refresh", (req, res) => authController.refresh(req, res));
+
 // Protected routes
-authRouter.get("/me", authenticate, AuthController.me);
+router.get("/me", authenticate, (req, res) => authController.me(req, res));
+
+export { router as authRouter };

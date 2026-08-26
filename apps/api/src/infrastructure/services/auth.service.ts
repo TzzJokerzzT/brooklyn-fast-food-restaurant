@@ -1,138 +1,112 @@
-import type { IAuthService } from "../../domain/interfaces/auth-service.interface.js";
-import type { IUserRepository } from "../../domain/interfaces/user-repository.interface.js";
-import type { IPasswordService } from "../../domain/interfaces/password-service.interface.js";
-import type { IJWTService } from "../../domain/interfaces/jwt-service.interface.js";
-import type { LoginDTO, RegisterDTO, AuthTokens, TokenPayload } from "../../domain/entities/user.entity.js";
-import { UserRole } from "../../domain/entities/user.entity.js";
+import { DEFAULT_ROLES } from "@/domain/entities/role.entity.js";
+import type {
+	AuthTokens,
+	LoginDTO,
+	RegisterDTO,
+	TokenPayload,
+} from "@/domain/entities/user.entity.js";
+import type { IAuthService } from "@/domain/interfaces/auth-service.interface.js";
+import type { IJWTService } from "@/domain/interfaces/jwt-service.interface.js";
+import type { IPasswordService } from "@/domain/interfaces/password-service.interface.js";
+import type { IUserRepository } from "@/domain/interfaces/user-repository.interface.js";
 
 // ── Auth Service ─────────────────────────────────────────────
-// Implements IAuthService - coordinates auth operations
+// Handles authentication logic with dependency injection
 
 export class AuthService implements IAuthService {
-  constructor(
-    private userRepository: IUserRepository,
-    private passwordService: IPasswordService,
-    private jwtService: IJWTService
-  ) {}
+	constructor(
+		private readonly userRepository: IUserRepository,
+		private readonly passwordService: IPasswordService,
+		private readonly jwtService: IJWTService,
+	) {}
 
-  async login(data: LoginDTO): Promise<AuthTokens> {
-    // Find user by email
-    const user = await this.userRepository.findByEmail(data.email);
-    if (!user) {
-      throw new Error("Invalid credentials");
-    }
+	async login(data: LoginDTO): Promise<AuthTokens> {
+		const user = await this.userRepository.findByEmail(data.email);
+		if (!user) {
+			throw new Error("Invalid credentials");
+		}
 
-    // Check if user is active
-    if (!user.isActive) {
-      throw new Error("Account is deactivated");
-    }
+		if (!user.isActive) {
+			throw new Error("Account is deactivated");
+		}
 
-    // Verify password
-    const isPasswordValid = await this.passwordService.compare(
-      data.password,
-      user.password
-    );
-    if (!isPasswordValid) {
-      throw new Error("Invalid credentials");
-    }
+		const isPasswordValid = await this.passwordService.compare(
+			data.password,
+			user.password,
+		);
+		if (!isPasswordValid) {
+			throw new Error("Invalid credentials");
+		}
 
-    // Generate tokens
-    const tokens = await this.generateTokens({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
+		await this.userRepository.updateLastLogin(user.id);
 
-    // Store refresh token
-    await this.userRepository.updateRefreshToken(user.id, tokens.refreshToken);
+		const payload: TokenPayload = {
+			userId: user.id,
+			email: user.email,
+			roleId: user.roleId,
+		};
 
-    // Update last login
-    await this.userRepository.updateLastLogin(user.id);
+		return this.jwtService.generateTokens(payload);
+	}
 
-    return tokens;
-  }
+	async register(data: RegisterDTO): Promise<AuthTokens> {
+		const existingUser = await this.userRepository.findByEmail(data.email);
+		if (existingUser) {
+			throw new Error("Email already registered");
+		}
 
-  async register(data: RegisterDTO): Promise<AuthTokens> {
-    // Check if email already exists
-    const existingUser = await this.userRepository.findByEmail(data.email);
-    if (existingUser) {
-      throw new Error("Email already registered");
-    }
+		const hashedPassword = await this.passwordService.hash(data.password);
 
-    // Hash password
-    const hashedPassword = await this.passwordService.hash(data.password);
+		const user = await this.userRepository.create({
+			userName: data.userName,
+			lastName: data.lastName,
+			email: data.email,
+			password: hashedPassword,
+			address: data.address,
+			roleId: DEFAULT_ROLES.CLIENTS,
+		});
 
-    // Create user with default role
-    const user = await this.userRepository.create({
-      userName: data.userName,
-      lastName: data.lastName,
-      email: data.email,
-      password: hashedPassword,
-      address: data.address,
-      role: UserRole.CLIENTS,
-    });
+		const payload: TokenPayload = {
+			userId: user.id,
+			email: user.email,
+			roleId: user.roleId,
+		};
 
-    // Generate tokens
-    const tokens = await this.generateTokens({
-      userId: user.id,
-      email: user.email,
-      role: user.role,
-    });
+		return this.jwtService.generateTokens(payload);
+	}
 
-    // Store refresh token
-    await this.userRepository.updateRefreshToken(user.id, tokens.refreshToken);
+	async refreshToken(refreshToken: string): Promise<AuthTokens> {
+		const payload = this.jwtService.verifyRefreshToken(refreshToken);
 
-    return tokens;
-  }
+		const user = await this.userRepository.findById(payload.userId);
+		if (!user?.isActive) {
+			throw new Error("Invalid refresh token");
+		}
 
-  async refreshToken(refreshToken: string): Promise<AuthTokens> {
-    try {
-      // Verify refresh token
-      const payload = this.jwtService.verifyRefreshToken(refreshToken);
+		const newPayload: TokenPayload = {
+			userId: user.id,
+			email: user.email,
+			roleId: user.roleId,
+		};
 
-      // Find user
-      const user = await this.userRepository.findById(payload.userId);
-      if (!user || !user.isActive) {
-        throw new Error("Invalid refresh token");
-      }
+		return this.jwtService.generateTokens(newPayload);
+	}
 
-      // Check if refresh token matches stored one
-      if (user.refreshToken !== refreshToken) {
-        throw new Error("Invalid refresh token");
-      }
+	// biome-ignore lint/suspicious/useAwait: Wrapping sync JWT in async for interface compatibility
+	async verifyAccessToken(token: string): Promise<TokenPayload> {
+		return Promise.resolve(this.jwtService.verifyAccessToken(token));
+	}
 
-      // Generate new tokens
-      const tokens = await this.generateTokens({
-        userId: user.id,
-        email: user.email,
-        role: user.role,
-      });
+	async hashPassword(password: string): Promise<string> {
+		return await this.passwordService.hash(password);
+	}
 
-      // Store new refresh token
-      await this.userRepository.updateRefreshToken(user.id, tokens.refreshToken);
+	async comparePassword(password: string, hash: string): Promise<boolean> {
+		return await this.passwordService.compare(password, hash);
+	}
 
-      return tokens;
-    } catch {
-      throw new Error("Invalid refresh token");
-    }
-  }
-
-  async verifyAccessToken(token: string): Promise<TokenPayload> {
-    return this.jwtService.verifyAccessToken(token);
-  }
-
-  async hashPassword(password: string): Promise<string> {
-    return this.passwordService.hash(password);
-  }
-
-  async comparePassword(password: string, hash: string): Promise<boolean> {
-    return this.passwordService.compare(password, hash);
-  }
-
-  async generateTokens(payload: TokenPayload): Promise<AuthTokens> {
-    const accessToken = this.jwtService.generateAccessToken(payload);
-    const refreshToken = this.jwtService.generateRefreshToken(payload);
-
-    return { accessToken, refreshToken };
-  }
+	// biome-ignore lint/suspicious/useAwait: Wrapping sync JWT in async for interface compatibility
+	async generateTokens(payload: TokenPayload): Promise<AuthTokens> {
+		return Promise.resolve(this.jwtService.generateTokens(payload));
+	}
 }

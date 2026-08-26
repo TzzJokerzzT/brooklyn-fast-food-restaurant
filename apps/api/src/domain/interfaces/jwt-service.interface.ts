@@ -1,11 +1,13 @@
-import type { TokenPayload } from "../entities/user.entity.js";
+import type { TokenPayload } from "@/domain/entities/user.entity.js";
 
 // ── JWT Service Interface ────────────────────────────────────
-// Abstract contract for JWT operations
+// Abstract contract for JWT token operations
 
 export interface IJWTService {
-	generateAccessToken(payload: TokenPayload): string;
-	generateRefreshToken(payload: TokenPayload): string;
+	generateTokens(payload: TokenPayload): {
+		accessToken: string;
+		refreshToken: string;
+	};
 	verifyAccessToken(token: string): TokenPayload;
 	verifyRefreshToken(token: string): TokenPayload;
 }

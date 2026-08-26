@@ -1,64 +1,62 @@
-import type { Request, Response, NextFunction } from "express";
-import { z, type ZodSchema } from "zod";
+import type { NextFunction, Request, Response } from "express";
 
-// ── Validation Middleware ─────────────────────────────────────
-// Generic middleware that validates request body against Zod schema
-
-export const validate = (schema: ZodSchema) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    const result = schema.safeParse(req.body);
-
-    if (!result.success) {
-      const errors = result.error.flatten().fieldErrors;
-      res.status(400).json({
-        error: "Validation failed",
-        details: errors,
-      });
-      return;
-    }
-
-    req.body = result.data;
-    next();
-  };
-};
+import { z } from "zod";
 
 // ── Validation Schemas ───────────────────────────────────────
 
-export const registerSchema = z.object({
-  userName: z.string().min(2, "User name must be at least 2 characters"),
-  lastName: z.string().min(2, "Last name must be at least 2 characters"),
-  email: z.string().email("Invalid email format"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(
-      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
-      "Password must contain at least one lowercase, one uppercase, and one number"
-    ),
-  address: z.string().optional(),
+const registerSchema = z.object({
+	userName: z.string().min(2, "Name must be at least 2 characters"),
+	lastName: z.string().min(2, "Last name must be at least 2 characters"),
+	email: z.string().email("Invalid email format"),
+	password: z
+		.string()
+		.min(6, "Password must be at least 6 characters")
+		.regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+		.regex(/[0-9]/, "Password must contain at least one number"),
+	address: z.string().optional(),
 });
 
-export const loginSchema = z.object({
-  email: z.string().email("Invalid email format"),
-  password: z.string().min(1, "Password is required"),
+const loginSchema = z.object({
+	email: z.string().email("Invalid email format"),
+	password: z.string().min(1, "Password is required"),
 });
 
-export const updateUserSchema = z.object({
-  userName: z.string().min(2).optional(),
-  lastName: z.string().min(2).optional(),
-  email: z.string().email().optional(),
-  address: z.string().optional(),
-  role: z.enum(["super-admin", "admin", "clients"]).optional(),
-  isActive: z.boolean().optional(),
+const updateUserSchema = z.object({
+	userName: z.string().min(2).optional(),
+	lastName: z.string().min(2).optional(),
+	email: z.string().email().optional(),
+	address: z.string().optional(),
+	roleId: z.number().int().min(1).max(3).optional(),
 });
 
-export const refreshTokenSchema = z.object({
-  refreshToken: z.string().min(1, "Refresh token is required"),
-});
+// ── Validation Middleware ─────────────────────────────────────
 
-export const paginationSchema = z.object({
-  page: z.coerce.number().min(1).default(1),
-  limit: z.coerce.number().min(1).max(100).default(10),
-  role: z.string().optional(),
-  search: z.string().optional(),
-});
+function validate(schema: z.ZodSchema) {
+	return (req: Request, res: Response, next: NextFunction): void => {
+		const result = schema.safeParse(req.body);
+
+		if (!result.success) {
+			const errors = result.error.errors.map((err) => ({
+				field: err.path.join("."),
+				message: err.message,
+			}));
+
+			res.status(400).json({
+				success: false,
+				message: "Validation error",
+				errors,
+			});
+			return;
+		}
+
+		// Replace req.body with validated data
+		req.body = result.data;
+		next();
+	};
+}
+
+// ── Exported Validators ──────────────────────────────────────
+
+export const validateRegister = validate(registerSchema);
+export const validateLogin = validate(loginSchema);
+export const validateUpdateUser = validate(updateUserSchema);

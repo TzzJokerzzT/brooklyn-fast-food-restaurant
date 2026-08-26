@@ -4,43 +4,47 @@ import {
 	authenticate,
 	requireAdmin,
 	requireSuperAdmin,
-} from "../../middleware/auth.middleware.js";
-import {
-	registerSchema,
-	updateUserSchema,
-	validate,
-} from "../../middleware/validation.middleware.js";
-import { UsersController } from "../controllers/users.controller.js";
+} from "@/middleware/auth.middleware.js";
+import { validateUpdateUser } from "@/middleware/validation.middleware.js";
+import { UsersController } from "@/presentation/controllers/users.controller.js";
 
 // ── Users Routes ─────────────────────────────────────────────
-// /api/v1/users/*
+// Admin-only routes for user management
 
-export const usersRouter: ExpressRouter = Router();
+const router: ExpressRouter = Router();
+const usersController = new UsersController();
 
 // All routes require authentication
-usersRouter.use(authenticate);
+router.use(authenticate);
 
-// Admin+ routes
-usersRouter.get("/", requireAdmin, UsersController.index);
-usersRouter.get("/:id", requireAdmin, UsersController.show);
+// Admin routes (admin or super-admin)
+router.get("/", requireAdmin, (req, res) => usersController.getAll(req, res));
 
-// Super-admin only routes
-usersRouter.post(
-	"/",
-	requireSuperAdmin,
-	validate(registerSchema),
-	UsersController.store,
+router.get("/:id", requireAdmin, (req, res) =>
+	usersController.getById(req, res),
 );
-usersRouter.put(
-	"/:id",
-	requireSuperAdmin,
-	validate(updateUserSchema),
-	UsersController.update,
+
+router.post("/", requireSuperAdmin, (req, res) =>
+	usersController.create(req, res),
 );
-usersRouter.delete("/:id", requireSuperAdmin, UsersController.destroy);
-usersRouter.patch("/:id/role", requireSuperAdmin, UsersController.updateRole);
-usersRouter.patch(
-	"/:id/status",
-	requireSuperAdmin,
-	UsersController.updateStatus,
+
+router.put("/:id", validateUpdateUser, requireAdmin, (req, res) =>
+	usersController.update(req, res),
 );
+
+// Role management (super-admin only)
+router.patch("/:id/role", requireSuperAdmin, (req, res) =>
+	usersController.updateRole(req, res),
+);
+
+// Status management (admin or super-admin)
+router.patch("/:id/status", requireAdmin, (req, res) =>
+	usersController.updateStatus(req, res),
+);
+
+// Delete (super-admin only)
+router.delete("/:id", requireSuperAdmin, (req, res) =>
+	usersController.delete(req, res),
+);
+
+export { router as usersRouter };

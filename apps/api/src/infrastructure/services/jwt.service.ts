@@ -1,31 +1,47 @@
+import type { TokenPayload } from "@/domain/entities/user.entity.js";
+import type { IJWTService } from "@/domain/interfaces/jwt-service.interface.js";
+import { env } from "@/lib/env.js";
+
 import jwt from "jsonwebtoken";
-import type { TokenPayload } from "../../domain/entities/user.entity.js";
-import type { IJWTService } from "../../domain/interfaces/jwt-service.interface.js";
-import { env } from "../../lib/env.js";
 
 // ── JWT Service ──────────────────────────────────────────────
-// Implements IJWTService using jsonwebtoken
+// Handles token generation and verification
 
 export class JWTService implements IJWTService {
-	generateAccessToken(payload: TokenPayload): string {
-		const options: jwt.SignOptions = {
-			expiresIn: 900, // 15 minutes in seconds
-		};
-		return jwt.sign(payload, env.JWT_SECRET, options);
-	}
+	generateTokens(payload: TokenPayload): {
+		accessToken: string;
+		refreshToken: string;
+	} {
+		const accessToken = jwt.sign(
+			{ userId: payload.userId, email: payload.email, roleId: payload.roleId },
+			env.JWT_ACCESS_SECRET,
+			{ expiresIn: env.JWT_ACCESS_EXPIRATION as unknown as number },
+		);
 
-	generateRefreshToken(payload: TokenPayload): string {
-		const options: jwt.SignOptions = {
-			expiresIn: 604800, // 7 days in seconds
-		};
-		return jwt.sign(payload, env.JWT_REFRESH_SECRET, options);
+		const refreshToken = jwt.sign(
+			{ userId: payload.userId, email: payload.email, roleId: payload.roleId },
+			env.JWT_REFRESH_SECRET,
+			{ expiresIn: env.JWT_REFRESH_EXPIRATION as unknown as number },
+		);
+
+		return { accessToken, refreshToken };
 	}
 
 	verifyAccessToken(token: string): TokenPayload {
-		return jwt.verify(token, env.JWT_SECRET) as TokenPayload;
+		const decoded = jwt.verify(token, env.JWT_ACCESS_SECRET) as TokenPayload;
+		return {
+			userId: decoded.userId,
+			email: decoded.email,
+			roleId: decoded.roleId,
+		};
 	}
 
 	verifyRefreshToken(token: string): TokenPayload {
-		return jwt.verify(token, env.JWT_REFRESH_SECRET) as TokenPayload;
+		const decoded = jwt.verify(token, env.JWT_REFRESH_SECRET) as TokenPayload;
+		return {
+			userId: decoded.userId,
+			email: decoded.email,
+			roleId: decoded.roleId,
+		};
 	}
 }

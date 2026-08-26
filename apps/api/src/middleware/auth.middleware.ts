@@ -1,26 +1,24 @@
 import type { NextFunction, Request, Response } from "express";
 
-import type { TokenPayload } from "../domain/entities/user.entity.js";
-import { UserRepository } from "../infrastructure/repositories/user.repository.js";
-import { AuthService } from "../infrastructure/services/auth.service.js";
-import { JWTService } from "../infrastructure/services/jwt.service.js";
-import { PasswordService } from "../infrastructure/services/password.service.js";
+import type { TokenPayload } from "@/domain/entities/user.entity.js";
+import { UserRepository } from "@/infrastructure/repositories/user.repository.js";
+import { AuthService } from "@/infrastructure/services/auth.service.js";
+import { JWTService } from "@/infrastructure/services/jwt.service.js";
+import { PasswordService } from "@/infrastructure/services/password.service.js";
 
-// ── Dependency Injection Container ────────────────────────────
-// Singleton instances for middleware
+// ── Auth Middleware ───────────────────────────────────────────
 
+// Create dependencies once (singleton pattern)
 const userRepository = new UserRepository();
 const passwordService = new PasswordService();
 const jwtService = new JWTService();
-
-export const authService = new AuthService(
+const authService = new AuthService(
 	userRepository,
 	passwordService,
 	jwtService,
 );
 
-// ── Extend Express Request ───────────────────────────────────
-
+// Extend Express Request
 declare global {
 	namespace Express {
 		interface Request {
@@ -29,9 +27,7 @@ declare global {
 	}
 }
 
-// ── Authentication Middleware ─────────────────────────────────
-// Verifies JWT token and attaches user to request
-
+// Authenticate middleware - verifies JWT token
 export const authenticate = async (
 	req: Request,
 	res: Response,
@@ -40,33 +36,37 @@ export const authenticate = async (
 	try {
 		const authHeader = req.headers.authorization;
 
-		if (!authHeader || !authHeader.startsWith("Bearer ")) {
-			res.status(401).json({ error: "Access token required" });
+		if (!authHeader?.startsWith("Bearer ")) {
+			res.status(401).json({ success: false, message: "No token provided" });
 			return;
 		}
 
 		const token = authHeader.split(" ")[1];
-		const payload = await authService.verifyAccessToken(token);
 
-		req.user = payload;
-		next();
-	} catch {
-		res.status(401).json({ error: "Invalid or expired token" });
+		try {
+			const payload = await authService.verifyAccessToken(token);
+			req.user = payload;
+			next();
+		} catch {
+			res.status(401).json({ success: false, message: "Invalid token" });
+		}
+	} catch (_error) {
+		res.status(500).json({ success: false, message: "Authentication error" });
 	}
 };
 
-// ── Authorization Middleware ──────────────────────────────────
-// Checks if user has required role(s)
-
-export const authorize = (...allowedRoles: string[]) => {
+// Authorize middleware - checks user role
+export const authorize = (allowedRoles: number[]) => {
 	return (req: Request, res: Response, next: NextFunction): void => {
 		if (!req.user) {
-			res.status(401).json({ error: "Authentication required" });
+			res.status(401).json({ success: false, message: "Not authenticated" });
 			return;
 		}
 
-		if (!allowedRoles.includes(req.user.role)) {
-			res.status(403).json({ error: "Insufficient permissions" });
+		if (!allowedRoles.includes(req.user.roleId)) {
+			res
+				.status(403)
+				.json({ success: false, message: "Insufficient permissions" });
 			return;
 		}
 
@@ -74,8 +74,8 @@ export const authorize = (...allowedRoles: string[]) => {
 	};
 };
 
-// ── Role-based Middleware Shortcuts ───────────────────────────
+// Require Super Admin (roleId = 1)
+export const requireSuperAdmin = authorize([1]);
 
-export const requireSuperAdmin = authorize("super-admin");
-export const requireAdmin = authorize("super-admin", "admin");
-export const requireAuth = authenticate;
+// Require Admin (roleId = 1 or 2)
+export const requireAdmin = authorize([1, 2]);

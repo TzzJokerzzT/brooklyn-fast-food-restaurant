@@ -1,108 +1,104 @@
 import type { Request, Response } from "express";
-import { UserRepository } from "../../infrastructure/repositories/user.repository.js";
-import { PasswordService } from "../../infrastructure/services/password.service.js";
-import { JWTService } from "../../infrastructure/services/jwt.service.js";
-import { AuthService } from "../../infrastructure/services/auth.service.js";
-import { toUserResponse } from "../../domain/entities/user.entity.js";
+
+import { toUserResponse } from "@/domain/entities/user.entity.js";
+import type { IAuthService } from "@/domain/interfaces/auth-service.interface.js";
+import type { UserRepository } from "@/infrastructure/repositories/user.repository.js";
 
 // ── Auth Controller ──────────────────────────────────────────
-// Handles authentication requests
-
-// Initialize dependencies
-const userRepository = new UserRepository();
-const passwordService = new PasswordService();
-const jwtService = new JWTService();
-const authService = new AuthService(userRepository, passwordService, jwtService);
+// Handles HTTP requests for authentication
 
 export class AuthController {
-  // ── POST /auth/register ─────────────────────────────────────
-  static async register(req: Request, res: Response): Promise<void> {
-    try {
-      const { userName, lastName, email, password, address } = req.body;
+	constructor(
+		private readonly authService: IAuthService,
+		private readonly userRepository: UserRepository,
+	) {}
 
-      const tokens = await authService.register({
-        userName,
-        lastName,
-        email,
-        password,
-        address,
-      });
+	async register(req: Request, res: Response): Promise<void> {
+		try {
+			const { userName, lastName, email, password, address } = req.body;
 
-      res.status(201).json({
-        message: "User registered successfully",
-        ...tokens,
-      });
-    } catch (error) {
-      if (error instanceof Error && error.message === "Email already registered") {
-        res.status(409).json({ error: error.message });
-        return;
-      }
-      res.status(500).json({ error: "Failed to register user" });
-    }
-  }
+			const tokens = await this.authService.register({
+				userName,
+				lastName,
+				email,
+				password,
+				address,
+			});
 
-  // ── POST /auth/login ────────────────────────────────────────
-  static async login(req: Request, res: Response): Promise<void> {
-    try {
-      const { email, password } = req.body;
+			const user = await this.userRepository.findByEmail(email);
 
-      const tokens = await authService.login({ email, password });
+			res.status(201).json({
+				success: true,
+				data: {
+					user: user ? toUserResponse(user) : null,
+					...tokens,
+				},
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Registration failed";
+			res.status(400).json({ success: false, message });
+		}
+	}
 
-      res.json({
-        message: "Login successful",
-        ...tokens,
-      });
-    } catch (error) {
-      if (error instanceof Error && error.message === "Invalid credentials") {
-        res.status(401).json({ error: error.message });
-        return;
-      }
-      if (error instanceof Error && error.message === "Account is deactivated") {
-        res.status(403).json({ error: error.message });
-        return;
-      }
-      res.status(500).json({ error: "Failed to login" });
-    }
-  }
+	async login(req: Request, res: Response): Promise<void> {
+		try {
+			const { email, password } = req.body;
 
-  // ── POST /auth/refresh ──────────────────────────────────────
-  static async refreshToken(req: Request, res: Response): Promise<void> {
-    try {
-      const { refreshToken } = req.body;
+			const tokens = await this.authService.login({ email, password });
 
-      const tokens = await authService.refreshToken(refreshToken);
+			const user = await this.userRepository.findByEmail(email);
 
-      res.json({
-        message: "Token refreshed successfully",
-        ...tokens,
-      });
-    } catch {
-      res.status(401).json({ error: "Invalid refresh token" });
-    }
-  }
+			res.status(200).json({
+				success: true,
+				data: {
+					user: user ? toUserResponse(user) : null,
+					...tokens,
+				},
+			});
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Login failed";
+			res.status(401).json({ success: false, message });
+		}
+	}
 
-  // ── GET /auth/me ────────────────────────────────────────────
-  static async me(req: Request, res: Response): Promise<void> {
-    try {
-      const userId = req.user?.userId;
+	async refresh(req: Request, res: Response): Promise<void> {
+		try {
+			const { refreshToken } = req.body;
 
-      if (!userId) {
-        res.status(401).json({ error: "Authentication required" });
-        return;
-      }
+			const tokens = await this.authService.refreshToken(refreshToken);
 
-      const user = await userRepository.findById(userId);
+			res.status(200).json({
+				success: true,
+				data: tokens,
+			});
+		} catch (error) {
+			const message = error instanceof Error ? error.message : "Refresh failed";
+			res.status(401).json({ success: false, message });
+		}
+	}
 
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+	async me(req: Request, res: Response): Promise<void> {
+		try {
+			if (!req.user) {
+				res.status(401).json({ success: false, message: "Not authenticated" });
+				return;
+			}
+			const user = await this.userRepository.findById(req.user.userId);
 
-      res.json({
-        user: toUserResponse(user),
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to get user" });
-    }
-  }
+			if (!user) {
+				res.status(404).json({ success: false, message: "User not found" });
+				return;
+			}
+
+			res.status(200).json({
+				success: true,
+				data: { user: toUserResponse(user) },
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to get user";
+			res.status(500).json({ success: false, message });
+		}
+	}
 }

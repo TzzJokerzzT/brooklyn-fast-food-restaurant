@@ -1,7 +1,7 @@
-// ── Presentation Layer Exports ────────────────────────────────
-// Controllers and routes
-
-export { AuthController } from "./controllers/auth.controller.js";
-export { UsersController } from "./controllers/users.controller.js";
-export { authRouter } from "./routes/auth.routes.js";
-export { usersRouter } from "./routes/users.routes.js";
+// Presentation layer exports
+// ── Controllers ──────────────────────────────────────────────
+export { AuthController } from "@/presentation/controllers/auth.controller.js";
+export { UsersController } from "@/presentation/controllers/users.controller.js";
+// ── Routes ───────────────────────────────────────────────────
+export { authRouter } from "@/presentation/routes/auth.routes.js";
+export { usersRouter } from "@/presentation/routes/users.routes.js";

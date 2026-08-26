@@ -1,93 +1,93 @@
 // ── User Entity ──────────────────────────────────────────────
 // Core business entity - no external dependencies
 
-export enum UserRole {
-  SUPER_ADMIN = "super-admin",
-  ADMIN = "admin",
-  CLIENTS = "clients",
+export interface Role {
+	id: number;
+	name: string;
 }
 
 export interface User {
-  id: string;
-  userName: string;
-  lastName: string;
-  email: string;
-  role: UserRole;
-  address: string | null;
-  isActive: boolean;
-  lastLoginAt: Date | null;
-  createdAt: Date;
-  updatedAt: Date;
+	id: number;
+	userName: string;
+	lastName: string;
+	email: string;
+	address: string | null;
+	isActive: boolean;
+	lastLoginAt: Date | null;
+	createdAt: Date;
+	updatedAt: Date;
+	roleId: number;
+	role?: Role;
 }
 
 export interface CreateUserDTO {
-  userName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  address?: string;
-  role?: UserRole;
+	userName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	address?: string;
+	roleId?: number;
 }
 
 export interface UpdateUserDTO {
-  userName?: string;
-  lastName?: string;
-  email?: string;
-  address?: string;
-  role?: UserRole;
-  isActive?: boolean;
+	userName?: string;
+	lastName?: string;
+	email?: string;
+	address?: string;
+	roleId?: number;
+	isActive?: boolean;
 }
 
 export interface UserResponse {
-  id: string;
-  userName: string;
-  lastName: string;
-  email: string;
-  role: UserRole;
-  address: string | null;
-  isActive: boolean;
-  lastLoginAt: Date | null;
-  createdAt: Date;
+	id: number;
+	userName: string;
+	lastName: string;
+	email: string;
+	address: string | null;
+	isActive: boolean;
+	lastLoginAt: Date | null;
+	createdAt: Date;
+	role?: { id: number; name: string };
 }
 
 // ── Auth Entities ────────────────────────────────────────────
 
 export interface LoginDTO {
-  email: string;
-  password: string;
+	email: string;
+	password: string;
 }
 
 export interface RegisterDTO {
-  userName: string;
-  lastName: string;
-  email: string;
-  password: string;
-  address?: string;
+	userName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	address?: string;
 }
 
 export interface AuthTokens {
-  accessToken: string;
-  refreshToken: string;
+	accessToken: string;
+	refreshToken: string;
 }
 
 export interface TokenPayload {
-  userId: string;
-  email: string;
-  role: UserRole;
+	userId: number;
+	email: string;
+	roleId: number;
 }
 
 // ── Helper Functions ─────────────────────────────────────────
 
 export function toUserResponse(user: User): UserResponse {
-  return {
-    id: user.id,
-    userName: user.userName,
-    lastName: user.lastName,
-    email: user.email,
-    role: user.role,
-    address: user.address,
-    isActive: user.isActive,
-    lastLoginAt: user.lastLoginAt,
-    createdAt: user.createdAt,
-  };
+	return {
+		id: user.id,
+		userName: user.userName,
+		lastName: user.lastName,
+		email: user.email,
+		address: user.address,
+		isActive: user.isActive,
+		lastLoginAt: user.lastLoginAt,
+		createdAt: user.createdAt,
+		role: user.role ? { id: user.role.id, name: user.role.name } : undefined,
+	};
 }

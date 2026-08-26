@@ -1,7 +1,9 @@
-// ── Infrastructure Layer Exports ─────────────────────────────
-// Concrete implementations of domain interfaces
+// Infrastructure layer exports
+// ── Repositories ─────────────────────────────────────────────
 
-export { UserRepository } from "./repositories/user.repository.js";
-export { AuthService } from "./services/auth.service.js";
-export { JWTService } from "./services/jwt.service.js";
-export { PasswordService } from "./services/password.service.js";
+export { RoleRepository } from "@/infrastructure/repositories/role.repository.js";
+export { UserRepository } from "@/infrastructure/repositories/user.repository.js";
+// ── Services ─────────────────────────────────────────────────
+export { AuthService } from "@/infrastructure/services/auth.service.js";
+export { JWTService } from "@/infrastructure/services/jwt.service.js";
+export { PasswordService } from "@/infrastructure/services/password.service.js";

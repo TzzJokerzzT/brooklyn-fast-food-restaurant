@@ -1,243 +1,206 @@
 import type { Request, Response } from "express";
-import { UserRepository } from "../../infrastructure/repositories/user.repository.js";
-import { PasswordService } from "../../infrastructure/services/password.service.js";
-import { toUserResponse } from "../../domain/entities/user.entity.js";
-import { UserRole } from "../../domain/entities/user.entity.js";
+
+import { toUserResponse } from "@/domain/entities/user.entity.js";
+import { UserRepository } from "@/infrastructure/repositories/user.repository.js";
+import { PasswordService } from "@/infrastructure/services/password.service.js";
 
 // ── Users Controller ─────────────────────────────────────────
-// Handles user management requests (admin/super-admin only)
-
-const userRepository = new UserRepository();
-const passwordService = new PasswordService();
+// Handles HTTP requests for user management (admin operations)
 
 export class UsersController {
-  // ── GET /users ──────────────────────────────────────────────
-  // List all users (admin+)
-  static async index(req: Request, res: Response): Promise<void> {
-    try {
-      const page = Number(req.query.page) || 1;
-      const limit = Number(req.query.limit) || 10;
-      const role = req.query.role as string | undefined;
-      const search = req.query.search as string | undefined;
+	private readonly userRepository: UserRepository;
+	private readonly passwordService: PasswordService;
 
-      const { users, total } = await userRepository.findAll({
-        page,
-        limit,
-        role,
-        search,
-      });
+	constructor() {
+		this.userRepository = new UserRepository();
+		this.passwordService = new PasswordService();
+	}
 
-      res.json({
-        users: users.map(toUserResponse),
-        pagination: {
-          page,
-          limit,
-          total,
-          pages: Math.ceil(total / limit),
-        },
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to fetch users" });
-    }
-  }
+	async getAll(req: Request, res: Response): Promise<void> {
+		try {
+			const { page = 1, limit = 10, roleId, search } = req.query;
 
-  // ── GET /users/:id ─────────────────────────────────────────
-  // Get user by ID (admin+)
-  static async show(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params as { id: string };
+			const result = await this.userRepository.findAll({
+				page: Number(page),
+				limit: Number(limit),
+				roleId: roleId ? Number(roleId) : undefined,
+				search: search as string,
+			});
 
-      const user = await userRepository.findById(id);
+			res.status(200).json({
+				success: true,
+				data: {
+					users: result.users.map(toUserResponse),
+					total: result.total,
+					page: Number(page),
+					limit: Number(limit),
+				},
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to fetch users";
+			res.status(500).json({ success: false, message });
+		}
+	}
 
-      if (!user) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+	async getById(req: Request, res: Response): Promise<void> {
+		try {
+			const { id } = req.params;
 
-      res.json({ user: toUserResponse(user) });
-    } catch {
-      res.status(500).json({ error: "Failed to fetch user" });
-    }
-  }
+			const user = await this.userRepository.findById(Number(id));
 
-  // ── POST /users ─────────────────────────────────────────────
-  // Create user (super-admin only)
-  static async store(req: Request, res: Response): Promise<void> {
-    try {
-      const { userName, lastName, email, password, address, role } = req.body;
+			if (!user) {
+				res.status(404).json({ success: false, message: "User not found" });
+				return;
+			}
 
-      // Check if email exists
-      const existingUser = await userRepository.findByEmail(email);
-      if (existingUser) {
-        res.status(409).json({ error: "Email already registered" });
-        return;
-      }
+			res.status(200).json({
+				success: true,
+				data: { user: toUserResponse(user) },
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to fetch user";
+			res.status(500).json({ success: false, message });
+		}
+	}
 
-      // Hash password
-      const hashedPassword = await passwordService.hash(password);
+	async create(req: Request, res: Response): Promise<void> {
+		try {
+			const { userName, lastName, email, password, address, roleId } = req.body;
 
-      // Create user
-      const user = await userRepository.create({
-        userName,
-        lastName,
-        email,
-        password: hashedPassword,
-        address,
-        role: role || UserRole.CLIENTS,
-      });
+			const existingUser = await this.userRepository.findByEmail(email);
+			if (existingUser) {
+				res
+					.status(400)
+					.json({ success: false, message: "Email already registered" });
+				return;
+			}
 
-      res.status(201).json({
-        message: "User created successfully",
-        user: toUserResponse(user),
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to create user" });
-    }
-  }
+			const hashedPassword = await this.passwordService.hash(password);
 
-  // ── PUT /users/:id ─────────────────────────────────────────
-  // Update user (super-admin can update role, admin can update name/email)
-  static async update(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params as { id: string };
-      const { userName, lastName, email, address, role, isActive } = req.body;
-      const currentUser = req.user;
+			const user = await this.userRepository.create({
+				userName,
+				lastName,
+				email,
+				password: hashedPassword,
+				address,
+				roleId,
+			});
 
-      // Check if user exists
-      const existingUser = await userRepository.findById(id);
-      if (!existingUser) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+			res.status(201).json({
+				success: true,
+				data: { user: toUserResponse(user) },
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to create user";
+			res.status(400).json({ success: false, message });
+		}
+	}
 
-      // Only super-admin can change roles
-      if (role && currentUser?.role !== UserRole.SUPER_ADMIN) {
-        res.status(403).json({ error: "Only super-admin can change user roles" });
-        return;
-      }
+	async update(req: Request, res: Response): Promise<void> {
+		try {
+			const { id } = req.params;
+			const { userName, lastName, email, address, roleId } = req.body;
 
-      // Only super-admin can deactivate users
-      if (isActive !== undefined && currentUser?.role !== UserRole.SUPER_ADMIN) {
-        res.status(403).json({ error: "Only super-admin can activate/deactivate users" });
-        return;
-      }
+			const user = await this.userRepository.findById(Number(id));
+			if (!user) {
+				res.status(404).json({ success: false, message: "User not found" });
+				return;
+			}
 
-      // Check if email is taken by another user
-      if (email && email !== existingUser.email) {
-        const emailTaken = await userRepository.findByEmail(email);
-        if (emailTaken) {
-          res.status(409).json({ error: "Email already in use" });
-          return;
-        }
-      }
+			const updatedUser = await this.userRepository.update(Number(id), {
+				userName,
+				lastName,
+				email,
+				address,
+				roleId,
+			});
 
-      // Update user
-      const updatedUser = await userRepository.update(id, {
-        ...(userName && { userName }),
-        ...(lastName && { lastName }),
-        ...(email && { email }),
-        ...(address !== undefined && { address }),
-        ...(role && { role }),
-        ...(isActive !== undefined && { isActive }),
-      });
+			res.status(200).json({
+				success: true,
+				data: { user: toUserResponse(updatedUser) },
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to update user";
+			res.status(400).json({ success: false, message });
+		}
+	}
 
-      res.json({
-        message: "User updated successfully",
-        user: toUserResponse(updatedUser),
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to update user" });
-    }
-  }
+	async updateRole(req: Request, res: Response): Promise<void> {
+		try {
+			const { id } = req.params;
+			const { roleId } = req.body;
 
-  // ── DELETE /users/:id ───────────────────────────────────────
-  // Delete user (super-admin only)
-  static async destroy(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params as { id: string };
+			const user = await this.userRepository.findById(Number(id));
+			if (!user) {
+				res.status(404).json({ success: false, message: "User not found" });
+				return;
+			}
 
-      // Check if user exists
-      const existingUser = await userRepository.findById(id);
-      if (!existingUser) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+			const updatedUser = await this.userRepository.update(Number(id), {
+				roleId,
+			});
 
-      // Prevent deleting yourself
-      if (req.user?.userId === id) {
-        res.status(400).json({ error: "Cannot delete your own account" });
-        return;
-      }
+			res.status(200).json({
+				success: true,
+				data: { user: toUserResponse(updatedUser) },
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to update role";
+			res.status(400).json({ success: false, message });
+		}
+	}
 
-      await userRepository.delete(id);
+	async updateStatus(req: Request, res: Response): Promise<void> {
+		try {
+			const { id } = req.params;
+			const { isActive } = req.body;
 
-      res.json({ message: "User deleted successfully" });
-    } catch {
-      res.status(500).json({ error: "Failed to delete user" });
-    }
-  }
+			const user = await this.userRepository.findById(Number(id));
+			if (!user) {
+				res.status(404).json({ success: false, message: "User not found" });
+				return;
+			}
 
-  // ── PATCH /users/:id/role ──────────────────────────────────
-  // Change user role (super-admin only)
-  static async updateRole(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params as { id: string };
-      const { role } = req.body;
+			const updatedUser = await this.userRepository.update(Number(id), {
+				isActive,
+			});
 
-      // Check if user exists
-      const existingUser = await userRepository.findById(id);
-      if (!existingUser) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
+			res.status(200).json({
+				success: true,
+				data: { user: toUserResponse(updatedUser) },
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to update status";
+			res.status(400).json({ success: false, message });
+		}
+	}
 
-      // Prevent changing your own role
-      if (req.user?.userId === id) {
-        res.status(400).json({ error: "Cannot change your own role" });
-        return;
-      }
+	async delete(req: Request, res: Response): Promise<void> {
+		try {
+			const { id } = req.params;
 
-      // Update role
-      const updatedUser = await userRepository.update(id, { role });
+			const user = await this.userRepository.findById(Number(id));
+			if (!user) {
+				res.status(404).json({ success: false, message: "User not found" });
+				return;
+			}
 
-      res.json({
-        message: "User role updated successfully",
-        user: toUserResponse(updatedUser),
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to update user role" });
-    }
-  }
+			await this.userRepository.delete(Number(id));
 
-  // ── PATCH /users/:id/status ────────────────────────────────
-  // Activate/deactivate user (super-admin only)
-  static async updateStatus(req: Request, res: Response): Promise<void> {
-    try {
-      const { id } = req.params as { id: string };
-      const { isActive } = req.body;
-
-      // Check if user exists
-      const existingUser = await userRepository.findById(id);
-      if (!existingUser) {
-        res.status(404).json({ error: "User not found" });
-        return;
-      }
-
-      // Prevent deactivating yourself
-      if (req.user?.userId === id && !isActive) {
-        res.status(400).json({ error: "Cannot deactivate your own account" });
-        return;
-      }
-
-      // Update status
-      const updatedUser = await userRepository.update(id, { isActive });
-
-      res.json({
-        message: `User ${isActive ? "activated" : "deactivated"} successfully`,
-        user: toUserResponse(updatedUser),
-      });
-    } catch {
-      res.status(500).json({ error: "Failed to update user status" });
-    }
-  }
+			res.status(200).json({
+				success: true,
+				message: "User deleted successfully",
+			});
+		} catch (error) {
+			const message =
+				error instanceof Error ? error.message : "Failed to delete user";
+			res.status(500).json({ success: false, message });
+		}
+	}
 }

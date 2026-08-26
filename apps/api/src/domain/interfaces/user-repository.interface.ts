@@ -7,26 +7,24 @@ import type {
 // ── Internal User (includes sensitive fields) ────────────────
 export interface InternalUser extends User {
 	password: string;
-	refreshToken: string | null;
 }
 
 // ── User Repository Interface ────────────────────────────────
 // Abstract contract for user data access
 
 export interface IUserRepository {
-	findById(id: string): Promise<InternalUser | null>;
+	findById(id: number): Promise<InternalUser | null>;
 	findByEmail(email: string): Promise<InternalUser | null>;
 	findAll(options?: FindAllOptions): Promise<{ users: User[]; total: number }>;
 	create(data: CreateUserDTO & { password: string }): Promise<User>;
-	update(id: string, data: UpdateUserDTO): Promise<User>;
-	delete(id: string): Promise<void>;
-	updateRefreshToken(id: string, refreshToken: string | null): Promise<void>;
-	updateLastLogin(id: string): Promise<void>;
+	update(id: number, data: UpdateUserDTO): Promise<User>;
+	delete(id: number): Promise<void>;
+	updateLastLogin(id: number): Promise<void>;
 }
 
 export interface FindAllOptions {
 	page?: number;
 	limit?: number;
-	role?: string;
+	roleId?: number;
 	search?: string;
 }
