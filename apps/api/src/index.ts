@@ -5,10 +5,6 @@ import helmet from "helmet";
 import { env } from "@/lib/env.js";
 import { authRouter } from "@/presentation/routes/auth.routes.js";
 import { usersRouter } from "@/presentation/routes/users.routes.js";
-import { eventsRouter } from "@/routes/events.js";
-import { menuRouter } from "@/routes/menu.js";
-import { ordersRouter } from "@/routes/orders.js";
-import { reservationsRouter } from "@/routes/reservations.js";
 
 import morgan from "morgan";
 
@@ -26,18 +22,10 @@ app.use(express.urlencoded({ extended: true }));
 // ── API Routes (with versioning) ─────────────────────────────
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", usersRouter);
-app.use("/api/v1/events", eventsRouter);
-app.use("/api/v1/menu", menuRouter);
-app.use("/api/v1/orders", ordersRouter);
-app.use("/api/v1/reservations", reservationsRouter);
 
 // ── Legacy routes (without v1 prefix) ────────────────────────
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
-app.use("/api/events", eventsRouter);
-app.use("/api/menu", menuRouter);
-app.use("/api/orders", ordersRouter);
-app.use("/api/reservations", reservationsRouter);
 
 // ── Health Check ─────────────────────────────────────────────
 app.get("/health", (_req, res) => {
