@@ -26,14 +26,14 @@ export default function Header() {
           >
             EVENTS
           </a>
-        </nav>
-        <div className="flex gap-4 items-center">
           <a
-            className="hidden md:block text-foreground hover:text-accent transition-colors duration-200 uppercase"
-            href="#signin"
+            className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+            href="#registro"
           >
             Registrarse
           </a>
+        </nav>
+        <div className="flex items-center">
           <Button className="uppercase bg-accent text-accent-foreground">
             Ordenar Ahora
           </Button>
