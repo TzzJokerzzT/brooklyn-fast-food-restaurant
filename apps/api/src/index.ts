@@ -1,47 +1,61 @@
-import express, { type Express } from "express";
 import cors from "cors";
+import express, { type Express } from "express";
 import helmet from "helmet";
+
+import { env } from "@/lib/env.js";
+import { authRouter } from "@/presentation/routes/auth.routes.js";
+import { usersRouter } from "@/presentation/routes/users.routes.js";
+
 import morgan from "morgan";
-import { env } from "./lib/env.js";
-import { menuRouter } from "./routes/menu.js";
-import { ordersRouter } from "./routes/orders.js";
-import { reservationsRouter } from "./routes/reservations.js";
-import { eventsRouter } from "./routes/events.js";
+
+// ── Express Server ───────────────────────────────────────────
 
 const app: Express = express();
-const PORT = env.PORT;
 
 // ── Middleware ────────────────────────────────────────────────
 app.use(helmet());
-app.use(cors({ origin: env.CORS_ORIGIN }));
+app.use(cors({ origin: env.CORS_ORIGIN, credentials: true }));
 app.use(morgan("dev"));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// ── Health check ─────────────────────────────────────────────
-app.get("/api/health", (_req, res) => {
-  res.json({ status: "ok", timestamp: new Date().toISOString() });
+// ── API Routes (with versioning) ─────────────────────────────
+app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/users", usersRouter);
+
+// ── Legacy routes (without v1 prefix) ────────────────────────
+app.use("/api/auth", authRouter);
+app.use("/api/users", usersRouter);
+
+// ── Health Check ─────────────────────────────────────────────
+app.get("/health", (_req, res) => {
+	res.json({
+		status: "ok",
+		timestamp: new Date().toISOString(),
+		uptime: process.uptime(),
+	});
 });
 
-// ── Routes ───────────────────────────────────────────────────
-app.use("/api/menu", menuRouter);
-app.use("/api/orders", ordersRouter);
-app.use("/api/reservations", reservationsRouter);
-app.use("/api/events", eventsRouter);
-
-// ── 404 handler ──────────────────────────────────────────────
+// ── 404 Handler ──────────────────────────────────────────────
 app.use((_req, res) => {
-  res.status(404).json({ error: "Not found" });
+	res.status(404).json({ success: false, message: "Not found" });
 });
 
-// ── Error handler ────────────────────────────────────────────
-app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
-  console.error(err.stack);
-  res.status(500).json({ error: "Internal server error" });
-});
+// ── Error Handler ────────────────────────────────────────────
+app.use(
+	(
+		_err: Error,
+		_req: express.Request,
+		res: express.Response,
+		_next: express.NextFunction,
+	) => {
+		res.status(500).json({ success: false, message: "Internal server error" });
+	},
+);
 
-// ── Start server ─────────────────────────────────────────────
-app.listen(PORT, () => {
-  console.log(`🚀 API server running on http://localhost:${PORT}`);
-});
+// ── Start Server ─────────────────────────────────────────────
+const PORT = env.PORT;
+
+app.listen(PORT, () => {});
 
 export default app;

@@ -1,39 +1,77 @@
-import { Router, type Router as ExpressRouter } from "express";
-import { prisma } from "../lib/prisma.js";
+import { type Router as ExpressRouter, Router } from "express";
 
-export const menuRouter: ExpressRouter = Router();
+import { prisma } from "@/lib/prisma.js";
 
-// Get all categories with items
-menuRouter.get("/", async (_req, res) => {
-  try {
-    const categories = await prisma.category.findMany({
-      where: { isActive: true },
-      include: {
-        items: {
-          where: { isAvailable: true },
-          orderBy: { sortOrder: "asc" },
-        },
-      },
-      orderBy: { sortOrder: "asc" },
-    });
-    res.json(categories);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch menu" });
-  }
+// ── Menu Router ──────────────────────────────────────────────
+
+const router: ExpressRouter = Router();
+
+// GET /api/menu - List all menu items with products
+router.get("/", async (_req, res) => {
+	try {
+		const products = await prisma.product.findMany({
+			orderBy: { productName: "asc" },
+		});
+
+		res.json({
+			success: true,
+			data: { products },
+		});
+	} catch (_error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch menu",
+		});
+	}
 });
 
-// Get single menu item
-menuRouter.get("/items/:id", async (req, res) => {
-  try {
-    const item = await prisma.menuItem.findUnique({
-      where: { id: req.params.id },
-      include: { category: true },
-    });
-    if (!item) {
-      return res.status(404).json({ error: "Item not found" });
-    }
-    res.json(item);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch item" });
-  }
+// GET /api/menu/:id - Get single product
+router.get("/:id", async (req, res) => {
+	try {
+		const { id } = req.params;
+
+		const product = await prisma.product.findUnique({
+			where: { id: Number(id) },
+		});
+
+		if (!product) {
+			res.status(404).json({
+				success: false,
+				message: "Product not found",
+			});
+			return;
+		}
+
+		res.json({
+			success: true,
+			data: { product },
+		});
+	} catch (_error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch product",
+		});
+	}
 });
+
+// GET /api/menu/promotions - Get promotional items
+router.get("/promotions", async (_req, res) => {
+	try {
+		const products = await prisma.product.findMany({
+			where: { isPromotion: true },
+			orderBy: { productName: "asc" },
+		});
+
+		res.json({
+			success: true,
+			data: { products },
+		});
+	} catch (_error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch promotions",
+		});
+	}
+});
+
+export { router as menuRouter };

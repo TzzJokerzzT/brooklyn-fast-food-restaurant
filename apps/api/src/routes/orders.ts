@@ -1,67 +1,85 @@
-import { Router, type Router as ExpressRouter } from "express";
-import { prisma } from "../lib/prisma.js";
+import { type Router as ExpressRouter, Router } from "express";
 
-export const ordersRouter: ExpressRouter = Router();
+import { prisma } from "@/lib/prisma.js";
 
-// Create order
-ordersRouter.post("/", async (req, res) => {
-  try {
-    const { userId, items, notes, tableNumber } = req.body;
+// ── Orders Router ────────────────────────────────────────────
 
-    const order = await prisma.order.create({
-      data: {
-        userId,
-        notes,
-        tableNumber,
-        total: 0, // Will be calculated
-        items: {
-          create: items.map((item: { menuItemId: string; quantity: number; price: number }) => ({
-            menuItemId: item.menuItemId,
-            quantity: item.quantity,
-            price: item.price,
-          })),
-        },
-      },
-      include: { items: true },
-    });
+const router: ExpressRouter = Router();
 
-    // Calculate total
-    const total = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-    await prisma.order.update({
-      where: { id: order.id },
-      data: { total },
-    });
+// GET /api/orders - List all purchases
+router.get("/", async (_req, res) => {
+	try {
+		const purchases = await prisma.purchase.findMany({
+			include: {
+				user: true,
+				product: true,
+			},
+			orderBy: { purchaseDate: "desc" },
+		});
 
-    res.status(201).json({ ...order, total });
-  } catch (error) {
-    res.status(500).json({ error: "Failed to create order" });
-  }
+		res.json({
+			success: true,
+			data: { purchases },
+		});
+	} catch (_error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch purchases",
+		});
+	}
 });
 
-// Get user orders
-ordersRouter.get("/user/:userId", async (req, res) => {
-  try {
-    const orders = await prisma.order.findMany({
-      where: { userId: req.params.userId },
-      include: { items: { include: { menuItem: true } } },
-      orderBy: { createdAt: "desc" },
-    });
-    res.json(orders);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to fetch orders" });
-  }
+// POST /api/orders - Create purchase
+router.post("/", async (req, res) => {
+	try {
+		const { userId, productId, quantity } = req.body;
+
+		const purchase = await prisma.purchase.create({
+			data: {
+				userId,
+				productId,
+				quantity: quantity || 1,
+				purchaseDate: new Date(),
+			},
+			include: {
+				user: true,
+				product: true,
+			},
+		});
+
+		res.status(201).json({
+			success: true,
+			data: { purchase },
+		});
+	} catch (_error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to create purchase",
+		});
+	}
 });
 
-// Update order status
-ordersRouter.patch("/:id/status", async (req, res) => {
-  try {
-    const { status } = req.body;
-    const order = await prisma.order.update({
-      where: { id: req.params.id },
-      data: { status },
-    });
-    res.json(order);
-  } catch (error) {
-    res.status(500).json({ error: "Failed to update order" });
-  }
+// GET /api/orders/user/:userId - Get user purchases
+router.get("/user/:userId", async (req, res) => {
+	try {
+		const { userId } = req.params;
+
+		const purchases = await prisma.purchase.findMany({
+			where: { userId: Number(userId) },
+			include: { product: true },
+			orderBy: { purchaseDate: "desc" },
+		});
+
+		res.json({
+			success: true,
+			data: { purchases },
+		});
+	} catch (_error) {
+		res.status(500).json({
+			success: false,
+			message: "Failed to fetch user purchases",
+		});
+	}
 });
+
+export { router as ordersRouter };
