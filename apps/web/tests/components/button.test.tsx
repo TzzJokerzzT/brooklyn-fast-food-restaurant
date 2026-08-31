@@ -10,7 +10,11 @@ function Button({
 	onClick?: () => void;
 }) {
 	return (
-		<button type="button" onClick={onClick} className="bg-accent text-white px-4 py-2">
+		<button
+			type="button"
+			onClick={onClick}
+			className="bg-accent text-white px-4 py-2"
+		>
 			{children}
 		</button>
 	);

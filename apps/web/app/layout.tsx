@@ -1,3 +1,5 @@
+import { Providers } from "@/src/shared/providers";
+
 import type { Metadata } from "next";
 import { Texturina } from "next/font/google";
 import "./globals.css";
@@ -24,7 +26,9 @@ export default function RootLayout({
 			<body
 				className={`${texturina.variable} min-h-screen w-full bg-background text-foreground antialiased`}
 			>
-				<main>{children}</main>
+				<Providers>
+					<main>{children}</main>
+				</Providers>
 			</body>
 		</html>
 	);
