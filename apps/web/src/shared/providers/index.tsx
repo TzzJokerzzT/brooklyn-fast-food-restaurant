@@ -2,8 +2,8 @@
 
 import { QueryProvider } from "@/src/shared/providers/query-provider";
 
-import { Toast } from "@heroui/react";
 import type { ReactNode } from "react";
+import ToastProvider from "./toast-provider";
 
 // ── Providers Wrapper ───────────────────────────────────────
 // Client component that wraps the app with all context providers.
@@ -13,7 +13,7 @@ import type { ReactNode } from "react";
 export function Providers({ children }: { children: ReactNode }) {
 	return (
 		<QueryProvider>
-			<Toast.Provider />
+			<ToastProvider />
 			{children}
 		</QueryProvider>
 	);

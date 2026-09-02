@@ -2,6 +2,7 @@ import { apiClient } from "@/src/shared/lib/axios";
 
 import type {
 	ApiResponse,
+	CreateUserDTO,
 	FindAllUsersParams,
 	PaginatedUsers,
 	UpdateUserDTO,
@@ -12,6 +13,16 @@ import type {
 // Admin user management API calls
 
 export const usersService = {
+	async create(
+		dto: CreateUserDTO,
+	): Promise<ApiResponse<{ user: UserResponse }>> {
+		const { data } = await apiClient.post<ApiResponse<{ user: UserResponse }>>(
+			"/users",
+			dto,
+		);
+		return data;
+	},
+
 	async getAll(
 		params?: FindAllUsersParams,
 	): Promise<ApiResponse<PaginatedUsers>> {

@@ -1,11 +1,11 @@
 import type {
-	ApiResponse,
 	FindAllUsersParams,
 	PaginatedUsers,
 	UpdateUserDTO,
 	UserResponse,
 } from "@/src/shared/services";
 import { usersService } from "@/src/shared/services";
+import { handleApiResponse } from "@/src/shared/services/query-helpers";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -25,9 +25,9 @@ export const usersKeys = {
 export function useUsers(params?: FindAllUsersParams) {
 	return useQuery({
 		queryKey: usersKeys.list(params),
-		queryFn: async (): Promise<PaginatedUsers | null> => {
+		queryFn: async (): Promise<PaginatedUsers> => {
 			const res = await usersService.getAll(params);
-			return res.success ? res.data : null;
+			return handleApiResponse(res);
 		},
 	});
 }
@@ -37,11 +37,41 @@ export function useUsers(params?: FindAllUsersParams) {
 export function useUser(id: number) {
 	return useQuery({
 		queryKey: usersKeys.detail(id),
-		queryFn: async (): Promise<UserResponse | null> => {
+		queryFn: async (): Promise<UserResponse> => {
 			const res = await usersService.getById(id);
-			return res.success ? res.data.user : null;
+			return handleApiResponse(res).user;
 		},
 		enabled: id > 0,
+	});
+}
+
+// ── Use Create User ─────────────────────────────────────────
+
+export function useCreateUser() {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({
+			userName,
+			lastName,
+			email,
+			password,
+			roleId,
+			address,
+		}: {
+			userName: string;
+			lastName: string;
+			email: string;
+			password: string;
+			roleId?: number;
+			address?: string;
+		}) =>
+			usersService
+				.create({ userName, lastName, email, password, roleId, address })
+				.then(handleApiResponse),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
+		},
 	});
 }
 
@@ -57,16 +87,11 @@ export function useUpdateUser() {
 		}: {
 			id: number;
 			dto: UpdateUserDTO;
-		}): Promise<ApiResponse<{ user: UserResponse }>> =>
-			usersService.update(id, dto),
+		}) =>
+			usersService.update(id, dto).then(handleApiResponse),
 		onSuccess: (data, variables) => {
-			if (data.success) {
-				queryClient.setQueryData(
-					usersKeys.detail(variables.id),
-					data.data.user,
-				);
-				queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
-			}
+			queryClient.setQueryData(usersKeys.detail(variables.id), data.user);
+			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
 		},
 	});
 }
@@ -83,16 +108,10 @@ export function useUpdateUserRole() {
 		}: {
 			id: number;
 			roleId: number;
-		}): Promise<ApiResponse<{ user: UserResponse }>> =>
-			usersService.updateRole(id, roleId),
+		}) => usersService.updateRole(id, roleId).then(handleApiResponse),
 		onSuccess: (data, variables) => {
-			if (data.success) {
-				queryClient.setQueryData(
-					usersKeys.detail(variables.id),
-					data.data.user,
-				);
-				queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
-			}
+			queryClient.setQueryData(usersKeys.detail(variables.id), data.user);
+			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
 		},
 	});
 }
@@ -109,16 +128,10 @@ export function useUpdateUserStatus() {
 		}: {
 			id: number;
 			isActive: boolean;
-		}): Promise<ApiResponse<{ user: UserResponse }>> =>
-			usersService.updateStatus(id, isActive),
+		}) => usersService.updateStatus(id, isActive).then(handleApiResponse),
 		onSuccess: (data, variables) => {
-			if (data.success) {
-				queryClient.setQueryData(
-					usersKeys.detail(variables.id),
-					data.data.user,
-				);
-				queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
-			}
+			queryClient.setQueryData(usersKeys.detail(variables.id), data.user);
+			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
 		},
 	});
 }
@@ -129,8 +142,8 @@ export function useDeleteUser() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (id: number): Promise<ApiResponse<{ message: string }>> =>
-			usersService.delete(id),
+		mutationFn: (id: number) =>
+			usersService.delete(id).then(handleApiResponse),
 		onSuccess: (_data, id) => {
 			queryClient.removeQueries({ queryKey: usersKeys.detail(id) });
 			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });

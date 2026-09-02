@@ -53,6 +53,15 @@ export interface RegisterDTO {
 
 // ── Users DTOs ──────────────────────────────────────────────
 
+export interface CreateUserDTO {
+	userName: string;
+	lastName: string;
+	email: string;
+	password: string;
+	address?: string;
+	roleId?: number;
+}
+
 export interface UpdateUserDTO {
 	userName?: string;
 	lastName?: string;

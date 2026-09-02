@@ -1,5 +1,6 @@
 export { authKeys, useLogin, useLogout, useMe, useRegister } from "./use-auth";
 export {
+	useCreateUser,
 	useDeleteUser,
 	usersKeys,
 	useUpdateUser,

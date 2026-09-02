@@ -1,8 +1,10 @@
 export { authService } from "./auth.service";
+export { ApiQueryError, handleApiResponse } from "./query-helpers";
 export type {
 	ApiError,
 	ApiResponse,
 	AuthTokens,
+	CreateUserDTO,
 	FindAllUsersParams,
 	LoginDTO,
 	LoginResponse,

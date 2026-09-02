@@ -1,5 +1,4 @@
 import type {
-	ApiResponse,
 	LoginDTO,
 	LoginResponse,
 	RegisterDTO,
@@ -7,6 +6,7 @@ import type {
 	UserResponse,
 } from "@/src/shared/services";
 import { authService } from "@/src/shared/services";
+import { handleApiResponse } from "@/src/shared/services/query-helpers";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -27,7 +27,7 @@ export function useMe() {
 		queryFn: async (): Promise<UserResponse | null> => {
 			try {
 				const res = await authService.me();
-				return res.success ? res.data.user : null;
+				return handleApiResponse(res).user;
 			} catch {
 				return null;
 			}
@@ -43,13 +43,11 @@ export function useLogin() {
 	const router = useRouter();
 
 	return useMutation({
-		mutationFn: (dto: LoginDTO): Promise<ApiResponse<LoginResponse>> =>
-			authService.login(dto),
+		mutationFn: (dto: LoginDTO) =>
+			authService.login(dto).then(handleApiResponse),
 		onSuccess: (data) => {
-			if (data.success) {
-				queryClient.setQueryData(authKeys.me(), data.data.user);
-				router.push("/");
-			}
+			queryClient.setQueryData(authKeys.me(), data.user);
+			router.push("/");
 		},
 	});
 }
@@ -61,13 +59,11 @@ export function useRegister() {
 	const router = useRouter();
 
 	return useMutation({
-		mutationFn: (dto: RegisterDTO): Promise<ApiResponse<RegisterResponse>> =>
-			authService.register(dto),
+		mutationFn: (dto: RegisterDTO) =>
+			authService.register(dto).then(handleApiResponse),
 		onSuccess: (data) => {
-			if (data.success) {
-				queryClient.setQueryData(authKeys.me(), data.data.user);
-				router.push("/");
-			}
+			queryClient.setQueryData(authKeys.me(), data.user);
+			router.push("/");
 		},
 	});
 }

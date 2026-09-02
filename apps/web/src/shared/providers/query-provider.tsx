@@ -1,6 +1,8 @@
 "use client";
 
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { getErrorMessage } from "@/src/shared/lib/axios";
+import { toast } from "@heroui/react";
 
 // ── Query Client Factory ────────────────────────────────────
 // Creates a fresh QueryClient per component mount (prevents
@@ -17,6 +19,9 @@ function makeQueryClient(): QueryClient {
 			},
 			mutations: {
 				retry: false,
+				onError: (error) => {
+					toast.danger(getErrorMessage(error));
+				},
 			},
 		},
 	});
