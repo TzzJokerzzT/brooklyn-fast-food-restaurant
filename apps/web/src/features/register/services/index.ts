@@ -1,5 +1,9 @@
 import { authService } from "@/src/shared/services/auth.service";
-import type { ApiResponse, RegisterDTO, RegisterResponse } from "@/src/shared/services/types";
+import type {
+	ApiResponse,
+	RegisterDTO,
+	RegisterResponse,
+} from "@/src/shared/services/types";
 
 // ── Register Service ──────────────────────────────────────
 // Delegates to authService.register() which handles:
@@ -7,9 +11,7 @@ import type { ApiResponse, RegisterDTO, RegisterResponse } from "@/src/shared/se
 // - Token storage on success
 
 export const registerService = {
-	async create(
-		dto: RegisterDTO,
-	): Promise<ApiResponse<RegisterResponse>> {
-		return authService.register(dto);
+	async create(dto: RegisterDTO): Promise<ApiResponse<RegisterResponse>> {
+		return await authService.register(dto);
 	},
 };

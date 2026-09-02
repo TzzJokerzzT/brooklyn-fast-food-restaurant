@@ -1,5 +1,6 @@
 "use client";
 
+import { Button, toast } from "@heroui/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -28,11 +29,32 @@ export default function RegisterForm() {
 				address: (formData.get("address") as string) || undefined,
 			});
 
+			toast("Registro exitoso!", {
+				actionProps: {
+					children: "Cerrar",
+					onPress: () => toast.clear(),
+					variant: "tertiary",
+				},
+				description: "Gracias por registrarte, ahora puede inciar sesión.",
+				// indicator: <Persons />,
+				variant: "default",
+			});
+
 			router.push("/");
 		} catch (err) {
 			setError(
 				err instanceof Error ? err.message : "Error al registrar usuario",
 			);
+			toast("Error al registrar usuario", {
+				actionProps: {
+					children: "Cerrar",
+					onPress: () => toast.clear(),
+					variant: "tertiary",
+				},
+				description: error || "Error al registrar usuario.",
+				// indicator: <Persons />,
+				variant: "default",
+			});
 		}
 	};
 
@@ -48,27 +70,30 @@ export default function RegisterForm() {
 					</h2>
 				</div>
 
-				{error && (
-					<div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded">
-						{error}
-					</div>
-				)}
+				{/* {error && ( */}
+				{/* 	<div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded"> */}
+				{/* 		{error} */}
+				{/* 	</div> */}
+				{/* )} */}
 
 				<form onSubmit={handleSubmit} className="flex flex-col gap-5">
 					<RegisterFields />
 
-					<button
+					<Button
 						type="submit"
-						disabled={isPending}
+						isDisabled={isPending}
 						className="w-full py-3 bg-white text-black font-bold uppercase tracking-wider hover:bg-zinc-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
 					>
 						{isPending ? "Registrando..." : "Crear cuenta"}
-					</button>
+					</Button>
 				</form>
 
 				<p className="mt-4 text-zinc-400 text-sm">
 					Si ya tienes una cuenta creada con nosotros entra{" "}
-					<Link href="/login" className="text-white underline hover:text-zinc-300">
+					<Link
+						href="/login"
+						className="text-white underline hover:text-zinc-300"
+					>
 						aquí
 					</Link>
 				</p>
