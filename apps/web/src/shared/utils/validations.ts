@@ -9,14 +9,14 @@ export interface ValidationResult {
 
 // ── Email ───────────────────────────────────────────────────
 
-const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+export const EMAIL_REGEX = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 export function validateEmail(email: string): ValidationResult {
 	if (!email.trim()) {
-		return { valid: false, message: "Email is required" };
+		return { valid: false, message: "Email es requerido" };
 	}
 	if (!EMAIL_REGEX.test(email)) {
-		return { valid: false, message: "Invalid email format" };
+		return { valid: false, message: "Formato de email invalido" };
 	}
 	return { valid: true, message: "" };
 }

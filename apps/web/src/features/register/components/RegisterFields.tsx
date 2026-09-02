@@ -8,7 +8,7 @@ import {
 
 import { type ChangeEvent, useState } from "react";
 
-export default function FormData() {
+export default function RegisterFields() {
 	const [form, setForm] = useState({
 		userName: "",
 		lastName: "",
