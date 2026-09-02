@@ -2,21 +2,18 @@
 
 import { Button, toast } from "@heroui/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
-import { useState } from "react";
 import { useRegister } from "../hooks";
 import RegisterFields from "./RegisterFields";
 
 // ── Register Form ────────────────────────────────────────
+// Simplified: hook handles redirect + cache on success,
+// global QueryClient onError handles error toast.
 
 export default function RegisterForm() {
-	const router = useRouter();
 	const { mutateAsync, isPending } = useRegister();
-	const [error, setError] = useState("");
 
 	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
-		setError("");
 
 		const formData = new FormData(e.currentTarget);
 
@@ -29,32 +26,12 @@ export default function RegisterForm() {
 				address: (formData.get("address") as string) || undefined,
 			});
 
-			toast("Registro exitoso!", {
-				actionProps: {
-					children: "Cerrar",
-					onPress: () => toast.clear(),
-					variant: "tertiary",
-				},
-				description: "Gracias por registrarte, ahora puede inciar sesión.",
-				// indicator: <Persons />,
-				variant: "default",
+			// Hook's onSuccess handles redirect — show toast before navigation
+			toast.success("Registro exitoso!", {
+				description: "Gracias por registrarte.",
 			});
-
-			router.push("/");
-		} catch (err) {
-			setError(
-				err instanceof Error ? err.message : "Error al registrar usuario",
-			);
-			toast("Error al registrar usuario", {
-				actionProps: {
-					children: "Cerrar",
-					onPress: () => toast.clear(),
-					variant: "tertiary",
-				},
-				description: error || "Error al registrar usuario.",
-				// indicator: <Persons />,
-				variant: "default",
-			});
+		} catch {
+			// Error toast already shown by global QueryClient onError
 		}
 	};
 
@@ -69,12 +46,6 @@ export default function RegisterForm() {
 						Registrarse
 					</h2>
 				</div>
-
-				{/* {error && ( */}
-				{/* 	<div className="mb-4 p-3 bg-red-950 border border-red-800 text-red-200 text-sm rounded"> */}
-				{/* 		{error} */}
-				{/* 	</div> */}
-				{/* )} */}
 
 				<form onSubmit={handleSubmit} className="flex flex-col gap-5">
 					<RegisterFields />
