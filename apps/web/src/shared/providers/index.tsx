@@ -2,8 +2,9 @@
 
 import { QueryProvider } from "@/src/shared/providers/query-provider";
 
+import { Toast } from "@heroui/react";
 import type { ReactNode } from "react";
-import ToastProvider from "./toast-provider";
+import { CustomToast, toastQueue } from "../components/Toast";
 
 // ── Providers Wrapper ───────────────────────────────────────
 // Client component that wraps the app with all context providers.
@@ -13,7 +14,9 @@ import ToastProvider from "./toast-provider";
 export function Providers({ children }: { children: ReactNode }) {
 	return (
 		<QueryProvider>
-			<ToastProvider />
+			<Toast.Provider placement="bottom" queue={toastQueue}>
+				{({ toast }) => <CustomToast toast={toast} />}
+			</Toast.Provider>
 			{children}
 		</QueryProvider>
 	);

@@ -36,7 +36,7 @@ export default function RegisterFields() {
 				value={form.userName}
 				onChange={handleChange}
 				errorMessage={validateName(form.userName).message}
-				validate={(value) => validateName(value).valid}
+				validate={(value: string) => validateName(value).valid}
 				minLength={2}
 				maxLength={100}
 			/>
@@ -48,7 +48,7 @@ export default function RegisterFields() {
 				value={form.lastName}
 				onChange={handleChange}
 				errorMessage={validateName(form.lastName).message}
-				validate={(value) => validateName(value).valid}
+				validate={(value: string) => validateName(value).valid}
 				minLength={2}
 				maxLength={100}
 			/>
@@ -60,7 +60,7 @@ export default function RegisterFields() {
 				value={form.address}
 				onChange={handleChange}
 				errorMessage="La dirección es requerida"
-				validate={(value) => value.length >= 2}
+				validate={(value: string) => value.length >= 2}
 				minLength={2}
 				maxLength={200}
 			/>
@@ -73,7 +73,7 @@ export default function RegisterFields() {
 				value={form.email}
 				onChange={handleChange}
 				errorMessage={validateEmail(form.email).message}
-				validate={(value) => validateEmail(value).valid}
+				validate={(value: string) => validateEmail(value).valid}
 				minLength={5}
 				maxLength={100}
 			/>
@@ -86,7 +86,7 @@ export default function RegisterFields() {
 				value={form.password}
 				onChange={handleChange}
 				errorMessage={validatePassword(form.password).message}
-				validate={(value) => validatePassword(value).valid}
+				validate={(value: string) => validatePassword(value).valid}
 				minLength={6}
 				maxLength={100}
 			/>
@@ -101,7 +101,7 @@ export default function RegisterFields() {
 				errorMessage={
 					validatePasswordConfirm(form.password, form.confirmPassword).message
 				}
-				validate={(value) =>
+				validate={(value: string) =>
 					validatePasswordConfirm(form.password, value).valid
 				}
 				minLength={6}
