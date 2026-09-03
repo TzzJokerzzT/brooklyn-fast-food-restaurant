@@ -68,9 +68,7 @@ export class ProductsController {
 			let productImageUrl: string | undefined;
 
 			if (req.file) {
-				const uploadResult = await cloudinaryService.uploadImage(
-					req.file as Express.Multer.File,
-				);
+				const uploadResult = await cloudinaryService.uploadImage(req.file);
 				productImageUrl = uploadResult.url;
 			}
 
@@ -134,7 +132,7 @@ export class ProductsController {
 				return;
 			}
 
-			let productImageUrl = existing.productImage;
+			let productImageUrl = existing.productImage ?? undefined;
 
 			if (req.file) {
 				// Delete old image if exists
@@ -148,9 +146,7 @@ export class ProductsController {
 				}
 
 				// Upload new image
-				const uploadResult = await cloudinaryService.uploadImage(
-					req.file as Express.Multer.File,
-				);
+				const uploadResult = await cloudinaryService.uploadImage(req.file);
 				productImageUrl = uploadResult.url;
 			}
 
