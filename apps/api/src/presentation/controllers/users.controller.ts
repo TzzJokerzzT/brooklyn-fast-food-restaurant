@@ -35,6 +35,7 @@ export class UsersController {
 					page: Number(page),
 					limit: Number(limit),
 				},
+				message: "Resource success",
 			});
 		} catch (error) {
 			const message =
