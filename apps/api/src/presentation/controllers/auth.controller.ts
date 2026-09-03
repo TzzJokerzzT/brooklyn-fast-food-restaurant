@@ -15,7 +15,8 @@ export class AuthController {
 
 	async register(req: Request, res: Response): Promise<void> {
 		try {
-			const { userName, lastName, email, password, address, phoneNumber } = req.body;
+			const { userName, lastName, email, password, address, phoneNumber } =
+				req.body;
 
 			const user = await this.authService.register({
 				userName,
