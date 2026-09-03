@@ -2,6 +2,14 @@
 // ── Entities ─────────────────────────────────────────────────
 
 export type {
+	CreateProductDTO,
+	FindAllProductsOptions,
+	Product,
+	ProductResponse,
+	UpdateProductDTO,
+} from "@/domain/entities/product.entity.js";
+export { toProductResponse } from "@/domain/entities/product.entity.js";
+export type {
 	CreateRoleDTO,
 	Role as RoleEntity,
 	UpdateRoleDTO,
@@ -22,6 +30,8 @@ export { toUserResponse } from "@/domain/entities/user.entity.js";
 export type { IAuthService } from "@/domain/interfaces/auth-service.interface.js";
 export type { IJWTService } from "@/domain/interfaces/jwt-service.interface.js";
 export type { IPasswordService } from "@/domain/interfaces/password-service.interface.js";
+export type { IProductRepository } from "@/domain/interfaces/product-repository.interface.js";
+export type { IProductService } from "@/domain/interfaces/product-service.interface.js";
 export type { IRoleRepository } from "@/domain/interfaces/role-repository.interface.js";
 export type {
 	FindAllOptions,

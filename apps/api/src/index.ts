@@ -4,6 +4,7 @@ import helmet from "helmet";
 
 import { env } from "@/lib/env.js";
 import { authRouter } from "@/presentation/routes/auth.routes.js";
+import { productsRouter } from "@/presentation/routes/products.routes.js";
 import { usersRouter } from "@/presentation/routes/users.routes.js";
 
 import path from "node:path";
@@ -40,10 +41,12 @@ app.use(
 // ── API Routes (with versioning) ─────────────────────────────
 app.use("/api/v1/auth", authRouter);
 app.use("/api/v1/users", usersRouter);
+app.use("/api/v1/products", productsRouter);
 
 // ── Legacy routes (without v1 prefix) ────────────────────────
 app.use("/api/auth", authRouter);
 app.use("/api/users", usersRouter);
+app.use("/api/products", productsRouter);
 
 // ── Health Check ─────────────────────────────────────────────
 app.get("/health", (_req, res) => {

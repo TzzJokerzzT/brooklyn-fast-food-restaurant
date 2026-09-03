@@ -250,7 +250,7 @@ Event (independiente)
 |--------|-------|--------------|
 | `Role` | `roles` | id, name (unique) |
 | `User` | `users` | id, userName, lastName, email (unique, indexed), password, address, phoneNumber, isActive, lastLoginAt, roleId (indexed) |
-| `Product` | `products` | id, productName, productImage, isPromotion, price, ingredients |
+| `Product` | `products` | id, productName, productImage, isPromotion, price, ingredients (string[]), createdAt, updatedAt |
 | `Purchase` | `purchases` | id, quantity, purchaseDate, userId, productId |
 | `Event` | `events` | id, eventName, description, eventImage, eventDateFrom, eventDateTo |
 
@@ -373,6 +373,13 @@ Base: `/api/v1` (también disponible en `/api`)
 | `PATCH` | `/users/:id/role` | Bearer JWT | super-admin (1) | — | `UsersController.updateRole` |
 | `PATCH` | `/users/:id/status` | Bearer JWT | admin (1,2) | — | `UsersController.updateStatus` |
 | `DELETE` | `/users/:id` | Bearer JWT | super-admin (1) | — | `UsersController.delete` |
+| `GET` | `/products` | No | — | — | `ProductsController.getAll` (paginado, buscable) |
+| `GET` | `/products/:id` | No | — | — | `ProductsController.getById` |
+| `POST` | `/products` | Bearer JWT | admin (1,2) | `validateCreateProduct` (Zod) + multer | `ProductsController.create` (acepta imagen) |
+| `POST` | `/products/bulk` | Bearer JWT | admin (1,2) | — | `ProductsController.createMany` |
+| `PUT` | `/products/:id` | Bearer JWT | admin (1,2) | `validateUpdateProduct` (Zod) + multer | `ProductsController.update` (acepta imagen) |
+| `DELETE` | `/products/:id` | Bearer JWT | admin (1,2) | — | `ProductsController.delete` |
+| `DELETE` | `/products/bulk` | Bearer JWT | admin (1,2) | — | `ProductsController.deleteMany` |
 
 ### Swagger API Docs
 
@@ -557,6 +564,36 @@ bun dev
 
 - **Fuente principal:** Texturina (Google Fonts)
 - **Pesos:** 400 (regular), 700 (bold)
+
+## Cloudinary (Image Upload)
+
+El backend usa **Cloudinary** para almacenar imágenes de productos.
+
+**Variables de entorno requeridas:**
+
+```bash
+CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_api_secret
+```
+
+**Obtener credenciales:**
+
+1. Crear cuenta en [cloudinary.com](https://cloudinary.com)
+2. Ir a **Dashboard** → **Product Environment**
+3. Copiar **Cloud Name**, **API Key**, y **API Secret**
+
+**Uso en endpoints:**
+
+- `POST /products` — Acepta `multipart/form-data` con campo `productImage`
+- `PUT /products/:id` — Reemplaza imagen existente (elimina la anterior de Cloudinary)
+- `DELETE /products/:id` — Elimina imagen de Cloudinary automáticamente
+
+**Límites:**
+
+- Tamaño máximo: 5MB por imagen
+- Formatos permitidos: jpg, png, gif, webp, etc.
+- Transformación automática: resize a 800x800 (limit) + quality auto
 
 ## Git Hooks
 

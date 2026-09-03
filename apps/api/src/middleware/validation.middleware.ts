@@ -30,6 +30,22 @@ const updateUserSchema = z.object({
 	roleId: z.number().int().min(1).max(3).optional(),
 });
 
+const createProductSchema = z.object({
+	productName: z.string().min(1, "Product name is required"),
+	isPromotion: z.boolean().optional(),
+	price: z.number().positive("Price must be positive"),
+	ingredients: z
+		.array(z.string())
+		.min(1, "At least one ingredient is required"),
+});
+
+const updateProductSchema = z.object({
+	productName: z.string().min(1).optional(),
+	isPromotion: z.boolean().optional(),
+	price: z.number().positive().optional(),
+	ingredients: z.array(z.string()).optional(),
+});
+
 // ── Validation Middleware ─────────────────────────────────────
 
 function validate(schema: z.ZodSchema) {
@@ -61,3 +77,5 @@ function validate(schema: z.ZodSchema) {
 export const validateRegister = validate(registerSchema);
 export const validateLogin = validate(loginSchema);
 export const validateUpdateUser = validate(updateUserSchema);
+export const validateCreateProduct = validate(createProductSchema);
+export const validateUpdateProduct = validate(updateProductSchema);
