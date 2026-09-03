@@ -15,24 +15,23 @@ export class AuthController {
 
 	async register(req: Request, res: Response): Promise<void> {
 		try {
-			const { userName, lastName, email, password, address } = req.body;
+			const { userName, lastName, email, password, address, phoneNumber } = req.body;
 
-			const tokens = await this.authService.register({
+			const user = await this.authService.register({
 				userName,
 				lastName,
 				email,
 				password,
 				address,
+				phoneNumber,
 			});
-
-			const user = await this.userRepository.findByEmail(email);
 
 			res.status(201).json({
 				success: true,
 				data: {
-					user: user ? toUserResponse(user) : null,
-					...tokens,
+					user: toUserResponse(user),
 				},
+				message: "User register success",
 			});
 		} catch (error) {
 			const message =
@@ -55,6 +54,7 @@ export class AuthController {
 					user: user ? toUserResponse(user) : null,
 					...tokens,
 				},
+				message: "User login success",
 			});
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Login failed";

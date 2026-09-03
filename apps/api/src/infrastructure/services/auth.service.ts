@@ -4,6 +4,7 @@ import type {
 	LoginDTO,
 	RegisterDTO,
 	TokenPayload,
+	User,
 } from "@/domain/entities/user.entity.js";
 import type { IAuthService } from "@/domain/interfaces/auth-service.interface.js";
 import type { IJWTService } from "@/domain/interfaces/jwt-service.interface.js";
@@ -49,7 +50,7 @@ export class AuthService implements IAuthService {
 		return this.jwtService.generateTokens(payload);
 	}
 
-	async register(data: RegisterDTO): Promise<AuthTokens> {
+	async register(data: RegisterDTO): Promise<User> {
 		const existingUser = await this.userRepository.findByEmail(data.email);
 		if (existingUser) {
 			throw new Error("Email already registered");
@@ -63,16 +64,11 @@ export class AuthService implements IAuthService {
 			email: data.email,
 			password: hashedPassword,
 			address: data.address,
+			phoneNumber: data.phoneNumber,
 			roleId: DEFAULT_ROLES.CLIENTS,
 		});
 
-		const payload: TokenPayload = {
-			userId: user.id,
-			email: user.email,
-			roleId: user.roleId,
-		};
-
-		return this.jwtService.generateTokens(payload);
+		return user;
 	}
 
 	async refreshToken(refreshToken: string): Promise<AuthTokens> {

@@ -22,6 +22,7 @@ function mapPrismaUser(user: PrismaUser & { role?: PrismaRole }): User {
 		lastName: user.lastName,
 		email: user.email,
 		address: user.address,
+		phoneNumber: user.phoneNumber,
 		isActive: user.isActive,
 		lastLoginAt: user.lastLoginAt,
 		createdAt: user.createdAt,
@@ -95,6 +96,7 @@ export class UserRepository implements IUserRepository {
 				email: data.email,
 				password: data.password,
 				address: data.address,
+				phoneNumber: data.phoneNumber,
 				roleId: data.roleId || 3, // Default to clients role
 			},
 			include: { role: true },

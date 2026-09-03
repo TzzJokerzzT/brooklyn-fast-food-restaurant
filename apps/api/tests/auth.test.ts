@@ -31,10 +31,10 @@ describe("AuthService", () => {
 				password: "Password123",
 			});
 
-			expect(result).toHaveProperty("accessToken");
-			expect(result).toHaveProperty("refreshToken");
-			expect(typeof result.accessToken).toBe("string");
-			expect(typeof result.refreshToken).toBe("string");
+			expect(result).toHaveProperty("id");
+			expect(result).toHaveProperty("email");
+			expect(result).toHaveProperty("userName");
+			expect(result.userName).toBe("Test");
 		});
 
 		it("should save user to database", async () => {
@@ -171,14 +171,20 @@ describe("AuthService", () => {
 
 	describe("refreshToken", () => {
 		it("should refresh tokens with valid refresh token", async () => {
-			const tokens = await authService.register({
+			await authService.register({
 				userName: "Refresh",
 				lastName: "Test",
 				email: `test-refresh-${Date.now()}@example.com`,
 				password: "Password123",
 			});
 
-			const newTokens = await authService.refreshToken(tokens.refreshToken);
+			// Login to get tokens
+			const loginResult = await authService.login({
+				email: `test-refresh-${Date.now()}@example.com`,
+				password: "Password123",
+			});
+
+			const newTokens = await authService.refreshToken(loginResult.refreshToken);
 
 			expect(newTokens).toHaveProperty("accessToken");
 			expect(newTokens).toHaveProperty("refreshToken");

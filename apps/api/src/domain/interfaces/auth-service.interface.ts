@@ -3,6 +3,7 @@ import type {
 	LoginDTO,
 	RegisterDTO,
 	TokenPayload,
+	User,
 } from "../entities/user.entity.js";
 
 // ── Auth Service Interface ───────────────────────────────────
@@ -10,7 +11,7 @@ import type {
 
 export interface IAuthService {
 	login(data: LoginDTO): Promise<AuthTokens>;
-	register(data: RegisterDTO): Promise<AuthTokens>;
+	register(data: RegisterDTO): Promise<User>;
 	refreshToken(refreshToken: string): Promise<AuthTokens>;
 	verifyAccessToken(token: string): Promise<TokenPayload>;
 	hashPassword(password: string): Promise<string>;

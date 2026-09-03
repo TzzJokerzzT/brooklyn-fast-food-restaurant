@@ -12,6 +12,7 @@ export interface User {
 	lastName: string;
 	email: string;
 	address: string | null;
+	phoneNumber: string | null;
 	isActive: boolean;
 	lastLoginAt: Date | null;
 	createdAt: Date;
@@ -26,6 +27,7 @@ export interface CreateUserDTO {
 	email: string;
 	password: string;
 	address?: string;
+	phoneNumber?: string;
 	roleId?: number;
 }
 
@@ -44,6 +46,7 @@ export interface UserResponse {
 	lastName: string;
 	email: string;
 	address: string | null;
+	phoneNumber: string | null;
 	isActive: boolean;
 	lastLoginAt: Date | null;
 	createdAt: Date;
@@ -63,6 +66,7 @@ export interface RegisterDTO {
 	email: string;
 	password: string;
 	address?: string;
+	phoneNumber?: string;
 }
 
 export interface AuthTokens {
@@ -85,6 +89,7 @@ export function toUserResponse(user: User): UserResponse {
 		lastName: user.lastName,
 		email: user.email,
 		address: user.address,
+		phoneNumber: user.phoneNumber,
 		isActive: user.isActive,
 		lastLoginAt: user.lastLoginAt,
 		createdAt: user.createdAt,
