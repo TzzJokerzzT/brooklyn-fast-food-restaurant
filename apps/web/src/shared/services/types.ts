@@ -25,6 +25,7 @@ export interface UserResponse {
 	lastName: string;
 	email: string;
 	address: string | null;
+	phoneNumber: string;
 	isActive: boolean;
 	lastLoginAt: string | null;
 	createdAt: string;
@@ -49,6 +50,7 @@ export interface RegisterDTO {
 	email: string;
 	password: string;
 	address?: string;
+	phoneNumber: string;
 }
 
 // ── Users DTOs ──────────────────────────────────────────────

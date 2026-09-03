@@ -6,8 +6,6 @@ import type {
 	LoginResponse,
 	MeResponse,
 	RefreshResponse,
-	RegisterDTO,
-	RegisterResponse,
 } from "./types";
 
 // ── Auth Service ────────────────────────────────────────────
@@ -17,19 +15,6 @@ export const authService = {
 	async login(dto: LoginDTO): Promise<ApiResponse<LoginResponse>> {
 		const { data } = await apiClient.post<ApiResponse<LoginResponse>>(
 			"/auth/login",
-			dto,
-		);
-
-		if (data.success) {
-			tokenStorage.setTokens(data.data.accessToken, data.data.refreshToken);
-		}
-
-		return data;
-	},
-
-	async register(dto: RegisterDTO): Promise<ApiResponse<RegisterResponse>> {
-		const { data } = await apiClient.post<ApiResponse<RegisterResponse>>(
-			"/auth/register",
 			dto,
 		);
 

@@ -14,6 +14,7 @@ export default function RegisterFields() {
 		lastName: "",
 		email: "",
 		address: "",
+		phoneNumber: "",
 		password: "",
 		confirmPassword: "",
 	});
@@ -76,6 +77,18 @@ export default function RegisterFields() {
 				validate={(value: string) => validateEmail(value).valid}
 				minLength={5}
 				maxLength={100}
+			/>
+
+			<BasicInput
+				labelText="Numero Telefonico"
+				placeholderText="Ingresa tu numero de telefono"
+				name="phoneNumber"
+				value={form.phoneNumber}
+				onChange={handleChange}
+				errorMessage={validateName(form.phoneNumber).message}
+				validate={(value: string) => validateName(value).valid}
+				minLength={10}
+				maxLength={13}
 			/>
 
 			<BasicInput

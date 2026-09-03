@@ -3,6 +3,7 @@
 import BasicButton from "@/src/shared/components/ui/BasicButton";
 
 import Link from "next/link";
+import type { FormEvent } from "react";
 import { useRegister } from "../hooks";
 import RegisterFields from "./RegisterFields";
 
@@ -13,7 +14,7 @@ import RegisterFields from "./RegisterFields";
 export default function RegisterForm() {
 	const { mutateAsync, isPending } = useRegister();
 
-	const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+	const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
 		e.preventDefault();
 
 		const formData = new FormData(e.currentTarget);
@@ -25,6 +26,7 @@ export default function RegisterForm() {
 				email: formData.get("email") as string,
 				password: formData.get("password") as string,
 				address: (formData.get("address") as string) || undefined,
+				phoneNumber: formData.get("phoneNumber") as string,
 			});
 		} catch {
 			// Error toast already shown by global QueryClient onError
@@ -34,16 +36,16 @@ export default function RegisterForm() {
 	return (
 		<section
 			id="registro"
-			className="w-full bg-black py-20 px-4 border-t border-zinc-900"
+			className="w-full bg-black py-20 px-4 border-t border-zinc-900 "
 		>
-			<div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 p-8 shadow-2xl">
+			<div className="max-w-md mx-auto bg-zinc-950 border border-zinc-800 rounded-3xl p-8 shadow-2xl">
 				<div className="flex items-center justify-between mb-8 pb-3 border-b border-zinc-800">
 					<h2 className="text-3xl font-black tracking-tighter text-white uppercase font-sans">
 						Registrarse
 					</h2>
 				</div>
 
-				<form onSubmit={handleSubmit} className="flex flex-col gap-5">
+				<form onSubmit={handleSubmit} className="flex flex-col gap-5 rounded">
 					<RegisterFields />
 
 					<BasicButton

@@ -1,13 +1,12 @@
 "use client";
 
 import { showToast } from "@/src/shared/components/Toast";
-import { authKeys } from "@/src/shared/hooks/use-auth";
-import { authService } from "@/src/shared/services/auth.service";
-import { handleApiResponse } from "@/src/shared/services/query-helpers";
-import type { RegisterDTO } from "@/src/shared/services/types";
+import { authKeys } from "@/src/shared/hooks";
+import { handleApiResponse, type RegisterDTO } from "@/src/shared/services";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { registerService } from "../services/register.service";
 
 // ── Use Register ──────────────────────────────────────────
 // Calls authService.register() directly — no service wrapper needed.
@@ -19,7 +18,7 @@ export function useRegister() {
 
 	return useMutation({
 		mutationFn: (dto: RegisterDTO) =>
-			authService.register(dto).then(handleApiResponse),
+			registerService.register(dto).then(handleApiResponse),
 		onSuccess: (data) => {
 			queryClient.setQueryData(authKeys.me(), data.user);
 			showToast("Usuario creado exitosamente", "success");
