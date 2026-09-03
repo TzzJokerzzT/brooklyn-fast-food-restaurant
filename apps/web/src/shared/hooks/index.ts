@@ -1,4 +1,4 @@
-export { authKeys, useLogin, useLogout, useMe, useRegister } from "./use-auth";
+export { authKeys, useLogin, useLogout, useMe } from "./use-auth";
 export {
 	useCreateUser,
 	useDeleteUser,
