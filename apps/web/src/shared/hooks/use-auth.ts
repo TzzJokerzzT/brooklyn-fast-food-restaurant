@@ -1,16 +1,9 @@
-import type {
-	LoginDTO,
-	LoginResponse,
-	RegisterDTO,
-	RegisterResponse,
-	UserResponse,
-} from "@/src/shared/services";
+import type { LoginDTO, UserResponse } from "@/src/shared/services";
 import { authService } from "@/src/shared/services";
 import { handleApiResponse } from "@/src/shared/services/query-helpers";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
-import { showToast } from "../components/Toast";
 
 // ── Query Keys ──────────────────────────────────────────────
 
@@ -46,22 +39,6 @@ export function useLogin() {
 	return useMutation({
 		mutationFn: (dto: LoginDTO) =>
 			authService.login(dto).then(handleApiResponse),
-		onSuccess: (data) => {
-			queryClient.setQueryData(authKeys.me(), data.user);
-			router.push("/");
-		},
-	});
-}
-
-// ── Use Register ────────────────────────────────────────────
-
-export function useRegister() {
-	const queryClient = useQueryClient();
-	const router = useRouter();
-
-	return useMutation({
-		mutationFn: (dto: RegisterDTO) =>
-			authService.register(dto).then(handleApiResponse),
 		onSuccess: (data) => {
 			queryClient.setQueryData(authKeys.me(), data.user);
 			router.push("/");
