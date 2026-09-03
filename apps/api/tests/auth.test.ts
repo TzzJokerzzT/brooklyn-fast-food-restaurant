@@ -184,7 +184,9 @@ describe("AuthService", () => {
 				password: "Password123",
 			});
 
-			const newTokens = await authService.refreshToken(loginResult.refreshToken);
+			const newTokens = await authService.refreshToken(
+				loginResult.refreshToken,
+			);
 
 			expect(newTokens).toHaveProperty("accessToken");
 			expect(newTokens).toHaveProperty("refreshToken");
