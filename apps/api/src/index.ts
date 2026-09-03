@@ -1,22 +1,20 @@
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
-import swaggerUi from "swagger-ui-express";
-import YAML from "yamljs";
-import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import { env } from "@/lib/env.js";
 import { authRouter } from "@/presentation/routes/auth.routes.js";
 import { usersRouter } from "@/presentation/routes/users.routes.js";
 
+import path from "node:path";
+import { fileURLToPath } from "node:url";
 import morgan from "morgan";
+import swaggerUi from "swagger-ui-express";
+import YAML from "yamljs";
 
 // ── Swagger ──────────────────────────────────────────────────
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const swaggerDocument = YAML.load(
-	path.join(__dirname, "..", "swagger.yaml"),
-);
+const swaggerDocument = YAML.load(path.join(__dirname, "..", "swagger.yaml"));
 
 // ── Express Server ───────────────────────────────────────────
 
@@ -30,10 +28,14 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 // ── Swagger UI ───────────────────────────────────────────────
-app.use("/api/docs", swaggerUi.serve, swaggerUi.setup(swaggerDocument, {
-	customCss: ".swagger-ui .topbar { display: none }",
-	customSiteTitle: "Brooklyn Fast Food — API Docs",
-}));
+app.use(
+	"/api/docs",
+	swaggerUi.serve,
+	swaggerUi.setup(swaggerDocument, {
+		customCss: ".swagger-ui .topbar { display: none }",
+		customSiteTitle: "Brooklyn Fast Food — API Docs",
+	}),
+);
 
 // ── API Routes (with versioning) ─────────────────────────────
 app.use("/api/v1/auth", authRouter);
