@@ -20,7 +20,7 @@ export class CloudinaryService {
 	// biome-ignore lint/suspicious/useAwait: Wrapping callback-based API in async for interface compatibility
 	async uploadImage(
 		file: Express.Multer.File,
-		folder = "brooklyn-products",
+		folder = "brooklyn-restaurant",
 	): Promise<CloudinaryUploadResult> {
 		return new Promise((resolve, reject) => {
 			const uploadStream = cloudinary.uploader.upload_stream(
