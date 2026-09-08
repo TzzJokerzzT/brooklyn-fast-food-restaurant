@@ -143,8 +143,7 @@ export class ProductsController {
 
 					const file = imageMap.get(index);
 					if (file) {
-						const uploadResult =
-							await cloudinaryService.uploadImage(file);
+						const uploadResult = await cloudinaryService.uploadImage(file);
 						productImageUrl = uploadResult.url;
 					}
 
