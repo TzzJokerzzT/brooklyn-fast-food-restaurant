@@ -32,18 +32,43 @@ const updateUserSchema = z.object({
 
 const createProductSchema = z.object({
 	productName: z.string().min(1, "Product name is required"),
-	isPromotion: z.boolean().optional(),
-	price: z.number().positive("Price must be positive"),
+	isPromotion: z.coerce.boolean().optional().default(false),
+	price: z.coerce.number().positive("Price must be positive"),
 	ingredients: z
-		.array(z.string())
-		.min(1, "At least one ingredient is required"),
+		.string()
+		.transform((val) => {
+			try {
+				const parsed = JSON.parse(val);
+				return Array.isArray(parsed) ? parsed : [val];
+			} catch {
+				// Si no es JSON válido, tratar como string separado por comas
+				return val
+					.split(",")
+					.map((s) => s.trim())
+					.filter(Boolean);
+			}
+		})
+		.pipe(z.array(z.string()).min(1, "At least one ingredient is required")),
 });
 
 const updateProductSchema = z.object({
 	productName: z.string().min(1).optional(),
-	isPromotion: z.boolean().optional(),
-	price: z.number().positive().optional(),
-	ingredients: z.array(z.string()).optional(),
+	isPromotion: z.coerce.boolean().optional(),
+	price: z.coerce.number().positive().optional(),
+	ingredients: z
+		.string()
+		.transform((val) => {
+			try {
+				const parsed = JSON.parse(val);
+				return Array.isArray(parsed) ? parsed : [val];
+			} catch {
+				return val
+					.split(",")
+					.map((s) => s.trim())
+					.filter(Boolean);
+			}
+		})
+		.pipe(z.array(z.string()).optional()),
 });
 
 // ── Validation Middleware ─────────────────────────────────────

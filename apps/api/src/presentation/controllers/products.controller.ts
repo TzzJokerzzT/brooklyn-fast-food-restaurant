@@ -94,9 +94,26 @@ export class ProductsController {
 
 	async createMany(req: Request, res: Response): Promise<void> {
 		try {
-			const { products } = req.body;
+			// Parse products from FormData (sent as JSON string in "products" field)
+			let productsData: Array<{
+				productName: string;
+				isPromotion?: boolean;
+				price: number;
+				ingredients: string[];
+			}>;
 
-			if (!Array.isArray(products) || products.length === 0) {
+			try {
+				const raw = req.body.products;
+				productsData = typeof raw === "string" ? JSON.parse(raw) : raw;
+			} catch {
+				res.status(400).json({
+					success: false,
+					message: "Invalid products data format",
+				});
+				return;
+			}
+
+			if (!Array.isArray(productsData) || productsData.length === 0) {
 				res.status(400).json({
 					success: false,
 					message: "Products array is required and must not be empty",
@@ -104,7 +121,44 @@ export class ProductsController {
 				return;
 			}
 
-			const createdProducts = await this.productService.createMany(products);
+			// Handle image uploads (files indexed by fieldname: productImages0, productImages1, ...)
+			const files = req.files as Express.Multer.File[] | undefined;
+			const imageMap = new Map<number, Express.Multer.File>();
+
+			if (files && files.length > 0) {
+				for (const file of files) {
+					// Multer array uploads use fieldname "productImages" for all
+					// We parse index from originalname: "0_product.jpg", "1_product.jpg"
+					const match = file.originalname.match(/^(\d+)_/);
+					if (match) {
+						imageMap.set(Number(match[1]), file);
+					}
+				}
+			}
+
+			// Upload images and build DTOs
+			const dtos = await Promise.all(
+				productsData.map(async (item, index) => {
+					let productImageUrl: string | undefined;
+
+					const file = imageMap.get(index);
+					if (file) {
+						const uploadResult =
+							await cloudinaryService.uploadImage(file);
+						productImageUrl = uploadResult.url;
+					}
+
+					return {
+						productName: item.productName,
+						productImage: productImageUrl,
+						isPromotion: item.isPromotion ?? false,
+						price: item.price,
+						ingredients: item.ingredients,
+					};
+				}),
+			);
+
+			const createdProducts = await this.productService.createMany(dtos);
 
 			res.status(201).json({
 				success: true,

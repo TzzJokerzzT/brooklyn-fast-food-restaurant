@@ -52,7 +52,11 @@ router.post(
 	(req, res) => productsController.create(req, res),
 );
 
-router.post("/bulk", (req, res) => productsController.createMany(req, res));
+router.post(
+	"/bulk",
+	upload.array("productImages", 10),
+	(req, res) => productsController.createMany(req, res),
+);
 
 router.put(
 	"/:id",
