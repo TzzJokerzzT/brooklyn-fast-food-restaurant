@@ -22,7 +22,7 @@ export function useRegister() {
 		onSuccess: (data) => {
 			queryClient.setQueryData(authKeys.me(), data.user);
 			showToast("Usuario creado exitosamente", "success");
-			router.push("/");
+			router.replace("/");
 		},
 		onError: (error) => {
 			showToast(error.message || "Error al crear el usuario", "error");

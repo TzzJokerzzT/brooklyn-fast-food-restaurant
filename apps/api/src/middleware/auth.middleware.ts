@@ -28,20 +28,21 @@ declare global {
 }
 
 // Authenticate middleware - verifies JWT token
+// Reads from httpOnly cookie first, then Authorization header (backward compat)
 export const authenticate = async (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ): Promise<void> => {
 	try {
-		const authHeader = req.headers.authorization;
+		const token =
+			req.cookies?.brooklyn_access_token ||
+			req.headers.authorization?.split(" ")[1];
 
-		if (!authHeader?.startsWith("Bearer ")) {
+		if (!token) {
 			res.status(401).json({ success: false, message: "No token provided" });
 			return;
 		}
-
-		const token = authHeader.split(" ")[1];
 
 		try {
 			const payload = await authService.verifyAccessToken(token);

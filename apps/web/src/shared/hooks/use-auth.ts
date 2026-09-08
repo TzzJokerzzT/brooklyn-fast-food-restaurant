@@ -1,6 +1,7 @@
 import type { LoginDTO, UserResponse } from "@/src/shared/services";
 import { authService } from "@/src/shared/services";
 import { handleApiResponse } from "@/src/shared/services/query-helpers";
+import { useAuthStore } from "@/src/shared/store/auth.store";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
@@ -16,13 +17,18 @@ export const authKeys = {
 // Fetches current user profile; returns null if not authenticated
 
 export function useMe() {
+	const setUser = useAuthStore((s) => s.setUser);
+
 	return useQuery({
 		queryKey: authKeys.me(),
 		queryFn: async (): Promise<UserResponse | null> => {
 			try {
 				const res = await authService.me();
-				return handleApiResponse(res).user;
+				const user = handleApiResponse(res).user;
+				setUser(user);
+				return user;
 			} catch {
+				setUser(null);
 				return null;
 			}
 		},
@@ -35,13 +41,15 @@ export function useMe() {
 export function useLogin() {
 	const queryClient = useQueryClient();
 	const router = useRouter();
+	const setUser = useAuthStore((s) => s.setUser);
 
 	return useMutation({
 		mutationFn: (dto: LoginDTO) =>
 			authService.login(dto).then(handleApiResponse),
 		onSuccess: (data) => {
+			setUser(data.user);
 			queryClient.setQueryData(authKeys.me(), data.user);
-			router.push("/");
+			router.replace("/");
 		},
 	});
 }
@@ -51,10 +59,12 @@ export function useLogin() {
 export function useLogout() {
 	const queryClient = useQueryClient();
 	const router = useRouter();
+	const logout = useAuthStore((s) => s.logout);
 
 	return () => {
+		logout();
 		authService.logout();
 		queryClient.clear();
-		router.push("/");
+		router.replace("/");
 	};
 }

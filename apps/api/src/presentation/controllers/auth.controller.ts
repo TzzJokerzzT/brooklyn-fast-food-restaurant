@@ -4,6 +4,28 @@ import { toUserResponse } from "@/domain/entities/user.entity.js";
 import type { IAuthService } from "@/domain/interfaces/auth-service.interface.js";
 import type { UserRepository } from "@/infrastructure/repositories/user.repository.js";
 
+// ── Cookie Config ────────────────────────────────────────────
+// httpOnly cookies for XSS protection.
+// SameSite=Lax works for same-site cross-port requests (localhost).
+
+const isProduction = process.env.NODE_ENV === "production";
+
+const ACCESS_COOKIE_OPTIONS = {
+	httpOnly: true as const,
+	secure: isProduction,
+	sameSite: "lax" as const,
+	maxAge: 15 * 60 * 1000, // 15 min
+	path: "/",
+};
+
+const REFRESH_COOKIE_OPTIONS = {
+	httpOnly: true as const,
+	secure: isProduction,
+	sameSite: "lax" as const,
+	maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
+	path: "/",
+};
+
 // ── Auth Controller ──────────────────────────────────────────
 // Handles HTTP requests for authentication
 
@@ -49,11 +71,22 @@ export class AuthController {
 
 			const user = await this.userRepository.findByEmail(email);
 
+			// Set httpOnly cookies — tokens never exposed to JavaScript
+			res.cookie(
+				"brooklyn_access_token",
+				tokens.accessToken,
+				ACCESS_COOKIE_OPTIONS,
+			);
+			res.cookie(
+				"brooklyn_refresh_token",
+				tokens.refreshToken,
+				REFRESH_COOKIE_OPTIONS,
+			);
+
 			res.status(200).json({
 				success: true,
 				data: {
 					user: user ? toUserResponse(user) : null,
-					...tokens,
 				},
 				message: "User login success",
 			});
@@ -65,13 +98,35 @@ export class AuthController {
 
 	async refresh(req: Request, res: Response): Promise<void> {
 		try {
-			const { refreshToken } = req.body;
+			// Read from cookie first, then body (backward compat)
+			const refreshToken =
+				req.cookies?.brooklyn_refresh_token || req.body.refreshToken;
+
+			if (!refreshToken) {
+				res
+					.status(401)
+					.json({ success: false, message: "No refresh token provided" });
+				return;
+			}
 
 			const tokens = await this.authService.refreshToken(refreshToken);
 
+			// Set new httpOnly cookies
+			res.cookie(
+				"brooklyn_access_token",
+				tokens.accessToken,
+				ACCESS_COOKIE_OPTIONS,
+			);
+			res.cookie(
+				"brooklyn_refresh_token",
+				tokens.refreshToken,
+				REFRESH_COOKIE_OPTIONS,
+			);
+
+			// Tokens are in httpOnly cookies — nothing to return in body
 			res.status(200).json({
 				success: true,
-				data: tokens,
+				data: {},
 			});
 		} catch (error) {
 			const message = error instanceof Error ? error.message : "Refresh failed";
@@ -101,5 +156,12 @@ export class AuthController {
 				error instanceof Error ? error.message : "Failed to get user";
 			res.status(500).json({ success: false, message });
 		}
+	}
+
+	// biome-ignore lint/suspicious/useAwait: Express route handler must be async for interface compatibility
+	async logout(_req: Request, res: Response): Promise<void> {
+		res.clearCookie("brooklyn_access_token", { path: "/" });
+		res.clearCookie("brooklyn_refresh_token", { path: "/" });
+		res.status(200).json({ success: true, message: "Logged out" });
 	}
 }

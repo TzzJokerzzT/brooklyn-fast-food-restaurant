@@ -1,4 +1,4 @@
-import apiClient, { tokenStorage } from "@/src/shared/lib/axios";
+import apiClient from "@/src/shared/lib/axios";
 import type {
 	ApiResponse,
 	RegisterDTO,
@@ -11,11 +11,7 @@ export const registerService = {
 			"/auth/register",
 			dto,
 		);
-
-		if (data.success) {
-			tokenStorage.setTokens(data.data.accessToken, data.data.refreshToken);
-		}
-
+		// No tokens to store — httpOnly cookies are set by backend on login
 		return data;
 	},
 };

@@ -7,12 +7,14 @@ import { Skeleton } from "@heroui/react";
 import { GlobeCheck } from "lucide-react";
 import Link from "next/link";
 import { useDashboardUser } from "../../feature/dashboard/hooks";
+import { useProducts } from "../../feature/products";
 import useSideNavBar from "../hooks/useSideNavBar";
 import { navItems } from "../utils/constant";
 
 export default function SideNavBar() {
 	const { isItemActive } = useSideNavBar();
 	const { data: user, isLoading } = useDashboardUser();
+	const { isLoading: isProductLoading } = useProducts();
 
 	return (
 		<nav className="hidden md:flex flex-col h-screen fixed left-0 top-0 w-64 border-r border-outline-variant bg-black z-50">
@@ -28,7 +30,7 @@ export default function SideNavBar() {
 
 			{/* Admin Profile */}
 			<div className="p-6 border-b border-outline-variant flex items-center gap-4">
-				{isLoading ? (
+				{isLoading && isProductLoading ? (
 					<div className="flex items-center gap-3">
 						<Skeleton className="h-10 w-10 shrink-0 rounded-full" />
 						<div className="flex-1 space-y-2">
@@ -60,7 +62,7 @@ export default function SideNavBar() {
 
 					return (
 						<li key={item.label} className="px-4 py-1">
-							{isLoading ? (
+							{isLoading && isProductLoading ? (
 								<div className="flex items-center gap-3">
 									<Skeleton className="h-10 w-10 shrink-0 rounded-full" />
 									<div className="flex-1 space-y-2">

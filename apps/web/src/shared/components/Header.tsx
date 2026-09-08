@@ -1,7 +1,13 @@
-import { Button } from "@heroui/react";
 import Link from "next/link";
+import { useLogout, useMe } from "../hooks";
+import { useAuthStore } from "../store/auth.store";
+import BasicButton from "./ui/BasicButton";
 
 export default function Header() {
+	const { isAuthenticated } = useAuthStore();
+	const { data: user } = useMe();
+	const logout = useLogout();
+
 	return (
 		<header className="fixed top-0 w-full z-50 bg-black/70 backdrop-blur-xl border-b border-accent">
 			<div className="flex justify-between items-center px-[var(--gutter)] py-4 w-full max-w-[var(--container-max)] mx-auto">
@@ -27,29 +33,44 @@ export default function Header() {
 					>
 						EVENTS
 					</a>
-					<Link
-						className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
-						href="/login"
-					>
-						Iniciar Sesión
-					</Link>
-					<Link
-						className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
-						href="/register"
-					>
-						Registrarse
-					</Link>
-					<Link
-						className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
-						href="/dashboard"
-					>
-						Dashboard
-					</Link>
+					{!isAuthenticated && (
+						<>
+							<Link
+								className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+								href="/login"
+							>
+								Iniciar Sesión
+							</Link>
+							<Link
+								className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+								href="/register"
+							>
+								Registrarse
+							</Link>
+						</>
+					)}
+					{user?.role?.name === "super-admin" ||
+						(user?.role?.name === "admin" && (
+							<Link
+								className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+								href="/dashboard"
+							>
+								Dashboard
+							</Link>
+						))}
 				</nav>
-				<div className="flex items-center">
-					<Button className="uppercase bg-accent text-accent-foreground">
+				<div className="flex items-center gap-3">
+					{isAuthenticated && (
+						<BasicButton
+							className="uppercase bg-accent text-accent-foreground"
+							onPress={logout}
+						>
+							Cerrar sesión
+						</BasicButton>
+					)}
+					<BasicButton className="uppercase bg-accent text-accent-foreground">
 						Ordenar Ahora
-					</Button>
+					</BasicButton>
 				</div>
 			</div>
 		</header>

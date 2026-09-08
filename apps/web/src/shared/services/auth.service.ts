@@ -1,15 +1,10 @@
-import { apiClient, tokenStorage } from "@/src/shared/lib/axios";
+import { apiClient } from "@/src/shared/lib/axios";
 
-import type {
-	ApiResponse,
-	LoginDTO,
-	LoginResponse,
-	MeResponse,
-	RefreshResponse,
-} from "./types";
+import type { ApiResponse, LoginDTO, LoginResponse, MeResponse } from "./types";
 
 // ── Auth Service ────────────────────────────────────────────
-// Handles authentication API calls and token persistence
+// Handles authentication API calls.
+// httpOnly cookies are managed by the backend — no client-side token handling.
 
 export const authService = {
 	async login(dto: LoginDTO): Promise<ApiResponse<LoginResponse>> {
@@ -17,24 +12,7 @@ export const authService = {
 			"/auth/login",
 			dto,
 		);
-
-		if (data.success) {
-			tokenStorage.setTokens(data.data.accessToken, data.data.refreshToken);
-		}
-
-		return data;
-	},
-
-	async refresh(refreshToken: string): Promise<ApiResponse<RefreshResponse>> {
-		const { data } = await apiClient.post<ApiResponse<RefreshResponse>>(
-			"/auth/refresh",
-			{ refreshToken },
-		);
-
-		if (data.success) {
-			tokenStorage.setTokens(data.data.accessToken, data.data.refreshToken);
-		}
-
+		// Backend sets httpOnly cookies — nothing to store on client
 		return data;
 	},
 
@@ -43,11 +21,11 @@ export const authService = {
 		return data;
 	},
 
-	logout(): void {
-		tokenStorage.clearTokens();
-	},
-
-	isAuthenticated(): boolean {
-		return !!tokenStorage.getAccessToken();
+	async logout(): Promise<void> {
+		try {
+			await apiClient.post("/auth/logout");
+		} catch {
+			// Ignore — cookies may already be cleared
+		}
 	},
 };

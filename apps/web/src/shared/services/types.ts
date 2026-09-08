@@ -32,11 +32,6 @@ export interface UserResponse {
 	role?: Role;
 }
 
-export interface AuthTokens {
-	accessToken: string;
-	refreshToken: string;
-}
-
 // ── Auth DTOs ───────────────────────────────────────────────
 
 export interface LoginDTO {
@@ -88,22 +83,14 @@ export interface PaginatedUsers {
 }
 
 // ── Auth Response Shapes ────────────────────────────────────
+// Tokens are in httpOnly cookies — not in response body
 
 export interface LoginResponse {
 	user: UserResponse;
-	accessToken: string;
-	refreshToken: string;
 }
 
 export interface RegisterResponse {
 	user: UserResponse;
-	accessToken: string;
-	refreshToken: string;
-}
-
-export interface RefreshResponse {
-	accessToken: string;
-	refreshToken: string;
 }
 
 export interface MeResponse {

@@ -5,6 +5,7 @@ import { QueryProvider } from "@/src/shared/providers/query-provider";
 import { Toast } from "@heroui/react";
 import type { ReactNode } from "react";
 import { CustomToast, toastQueue } from "../components/Toast";
+import { BfCacheHandler } from "./bf-cache-handler";
 
 // ── Providers Wrapper ───────────────────────────────────────
 // Client component that wraps the app with all context providers.
@@ -17,6 +18,7 @@ export function Providers({ children }: { children: ReactNode }) {
 			<Toast.Provider placement="bottom" queue={toastQueue}>
 				{({ toast }) => <CustomToast toast={toast} />}
 			</Toast.Provider>
+			<BfCacheHandler />
 			{children}
 		</QueryProvider>
 	);

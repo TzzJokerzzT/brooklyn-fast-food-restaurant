@@ -1,3 +1,4 @@
+import { AppInitializer } from "@/src/shared/components/AppInitializer";
 import { Providers } from "@/src/shared/providers";
 
 import type { Metadata } from "next";
@@ -27,7 +28,9 @@ export default function RootLayout({
 				className={`${texturina.variable} min-h-screen w-full bg-background text-foreground antialiased`}
 			>
 				<Providers>
-					<main>{children}</main>
+					<AppInitializer>
+						<main>{children}</main>
+					</AppInitializer>
 				</Providers>
 			</body>
 		</html>

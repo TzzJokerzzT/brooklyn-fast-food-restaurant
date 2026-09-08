@@ -10,7 +10,6 @@ import { CirclePlus, Save, X } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
 import { Dropzone } from "../../../shared/components/Dropzone";
-import DashboardLayout from "../../dashboard/components/DashboardLayout";
 import {
 	useCreateProduct,
 	useCreateProducts,
@@ -253,24 +252,21 @@ function ProductFormInner() {
 
 	if (isEditMode && isLoadingProduct) {
 		return (
-			<DashboardLayout>
-				<div className="glass-panel p-6">
-					<div className="flex items-center justify-center h-64">
-						<p className="font-label-bold text-on-surface-variant animate-pulse">
-							CARGANDO PRODUCTO...
-						</p>
-					</div>
+			<div className="glass-panel p-6">
+				<div className="flex items-center justify-center h-64">
+					<p className="font-label-bold text-on-surface-variant animate-pulse">
+						CARGANDO PRODUCTO...
+					</p>
 				</div>
-			</DashboardLayout>
+			</div>
 		);
 	}
 
 	// ── Render ────────────────────────────────────────────────
 
 	return (
-		<DashboardLayout>
-			<div className="glass-panel p-6">
-				{/* Header */}
+		<div className="glass-panel p-6">
+			{/* Header */}
 				<div className="flex justify-between items-center mb-6 border-b border-white/20 pb-4">
 					<h3 className="font-headline-lg-mobile text-headline-lg-mobile uppercase text-on-surface">
 						{isEditMode ? "EDITAR PRODUCTO" : "CREAR PRODUCTO"}
@@ -496,14 +492,13 @@ function ProductFormInner() {
 									<CirclePlus className="w-5 h-5" />
 									{mode === "single"
 										? "Crear producto"
-										: `Crear ${items.length} productos`}
-								</div>
-							)}
-						</BasicButton>
-					</div>
-				</form>
-			</div>
-		</DashboardLayout>
+									: `Crear ${items.length} productos`}
+							</div>
+						)}
+					</BasicButton>
+				</div>
+			</form>
+		</div>
 	);
 }
 
@@ -515,15 +510,13 @@ export default function ProductForm() {
 	return (
 		<Suspense
 			fallback={
-				<DashboardLayout>
-					<div className="glass-panel p-6">
-						<div className="flex items-center justify-center h-64">
-							<p className="font-label-bold text-on-surface-variant animate-pulse">
-								CARGANDO...
-							</p>
-						</div>
+				<div className="glass-panel p-6">
+					<div className="flex items-center justify-center h-64">
+						<p className="font-label-bold text-on-surface-variant animate-pulse">
+							CARGANDO...
+						</p>
 					</div>
-				</DashboardLayout>
+				</div>
 			}
 		>
 			<ProductFormInner />
