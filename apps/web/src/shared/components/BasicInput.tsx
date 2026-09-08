@@ -14,6 +14,7 @@ export default function BasicInput({
 	validate,
 	className,
 	onChange,
+	onKeyDown,
 	disabled = false,
 	variant = "primary",
 	pattern,
@@ -36,6 +37,7 @@ export default function BasicInput({
 			<Input
 				disabled={disabled}
 				onChange={onChange}
+				onKeyDown={onKeyDown}
 				placeholder={placeholderText}
 				minLength={minLength}
 				maxLength={maxLength}

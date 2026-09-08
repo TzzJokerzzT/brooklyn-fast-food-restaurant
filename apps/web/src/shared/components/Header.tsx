@@ -29,9 +29,21 @@ export default function Header() {
 					</a>
 					<Link
 						className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+						href="/login"
+					>
+						Iniciar Sesión
+					</Link>
+					<Link
+						className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
 						href="/register"
 					>
 						Registrarse
+					</Link>
+					<Link
+						className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+						href="/dashboard"
+					>
+						Dashboard
 					</Link>
 				</nav>
 				<div className="flex items-center">

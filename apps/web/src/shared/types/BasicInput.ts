@@ -1,4 +1,4 @@
-import type { ChangeEvent } from "react";
+import type { ChangeEvent, KeyboardEvent } from "react";
 
 export interface BasicInputProps {
 	labelText: string;
@@ -13,6 +13,7 @@ export interface BasicInputProps {
 	value?: string;
 	className?: string;
 	onChange?: (event: ChangeEvent<HTMLInputElement>) => void;
+	onKeyDown?: (event: KeyboardEvent<HTMLInputElement>) => void;
 	disabled?: boolean;
 	variant?: "primary" | "secondary";
 	pattern?: string;
