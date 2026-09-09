@@ -3,9 +3,9 @@ import { authService } from "@/src/shared/services";
 import { handleApiResponse } from "@/src/shared/services/query-helpers";
 import { useAuthStore } from "@/src/shared/store/auth.store";
 
-import { toast } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
+import { showToast } from "../components/Toast";
 
 // ── Query Keys ──────────────────────────────────────────────
 
@@ -50,7 +50,13 @@ export function useLogin() {
 		onSuccess: (data) => {
 			setUser(data.user);
 			queryClient.setQueryData(authKeys.me(), data.user);
+			showToast("Has iniciado sesión correctamente", "success");
 			router.replace("/");
+		},
+		onError: (error) => {
+			const message =
+				error instanceof Error ? error.message : "Error al crear producto";
+			showToast(message, "error");
 		},
 	});
 }
@@ -71,9 +77,7 @@ export function useLogout() {
 		queryClient.clear();
 
 		// 3. Redirect after cleanup
-		toast.success("Sesión cerrada", {
-			description: "Has cerrado sesión correctamente",
-		});
+		showToast("Has cerrado sesión correctamente", "success");
 		router.replace("/");
 	};
 }
