@@ -1,4 +1,3 @@
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import express, { type Express } from "express";
 import helmet from "helmet";
@@ -10,6 +9,7 @@ import { usersRouter } from "@/presentation/routes/users.routes.js";
 
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import cookieParser from "cookie-parser";
 import morgan from "morgan";
 import swaggerUi from "swagger-ui-express";
 import YAML from "yamljs";
