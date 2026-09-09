@@ -49,15 +49,15 @@ export default function Header() {
 							</Link>
 						</>
 					)}
-					{user?.role?.name === "super-admin" ||
-						(user?.role?.name === "admin" && (
-							<Link
-								className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
-								href="/dashboard"
-							>
-								Dashboard
-							</Link>
-						))}
+					{(user?.role?.name === "super-admin" ||
+						user?.role?.name === "admin") && (
+						<Link
+							className="text-foreground uppercase hover:text-accent transition-colors duration-200 font-bold"
+							href="/dashboard"
+						>
+							Dashboard
+						</Link>
+					)}
 				</nav>
 				<div className="flex items-center gap-3">
 					{isAuthenticated && (

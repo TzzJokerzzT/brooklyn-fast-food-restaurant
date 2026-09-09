@@ -2,9 +2,10 @@
 
 import BasicAvatar from "@/src/shared/components/ui/BasicAvatar";
 import BasicButton from "@/src/shared/components/ui/BasicButton";
+import { useLogout } from "@/src/shared/hooks/use-auth";
 
 import { Skeleton } from "@heroui/react";
-import { GlobeCheck } from "lucide-react";
+import { GlobeCheck, LogOut } from "lucide-react";
 import Link from "next/link";
 import { useDashboardUser } from "../../feature/dashboard/hooks";
 import { useProducts } from "../../feature/products";
@@ -15,6 +16,7 @@ export default function SideNavBar() {
 	const { isItemActive } = useSideNavBar();
 	const { data: user, isLoading } = useDashboardUser();
 	const { isLoading: isProductLoading } = useProducts();
+	const logout = useLogout();
 
 	return (
 		<nav className="hidden md:flex flex-col h-screen fixed left-0 top-0 w-64 border-r border-outline-variant bg-black z-50">
@@ -104,8 +106,8 @@ export default function SideNavBar() {
 				})}
 			</ul>
 
-			{/* View Live Site */}
-			<div className="p-6 border-t border-outline-variant mt-auto">
+			{/* Footer Actions */}
+			<div className="p-6 border-t border-outline-variant mt-auto flex flex-col gap-2">
 				<BasicButton>
 					<Link
 						href="/"
@@ -113,8 +115,15 @@ export default function SideNavBar() {
 						className="btn-secondary w-full flex items-center justify-center gap-2 text-foreground"
 					>
 						<GlobeCheck size={16} />
-						Ver Sitio Veb
+						Ver Sitio Web
 					</Link>
+				</BasicButton>
+				<BasicButton
+					className="flex items-center justify-center gap-2 w-full py-3 text-red-400 hover:text-red-300 hover:bg-red-500/10 border border-red-500/20 rounded-xl transition-colors"
+					onPress={logout}
+				>
+					<LogOut size={16} />
+					<span className="font-label-bold text-label-bold">Cerrar Sesión</span>
 				</BasicButton>
 			</div>
 		</nav>

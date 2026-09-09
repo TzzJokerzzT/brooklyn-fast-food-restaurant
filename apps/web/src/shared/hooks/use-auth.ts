@@ -3,6 +3,7 @@ import { authService } from "@/src/shared/services";
 import { handleApiResponse } from "@/src/shared/services/query-helpers";
 import { useAuthStore } from "@/src/shared/store/auth.store";
 
+import { toast } from "@heroui/react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -61,10 +62,18 @@ export function useLogout() {
 	const router = useRouter();
 	const logout = useAuthStore((s) => s.logout);
 
-	return () => {
+	return async () => {
+		// 1. Clear local state immediately
 		logout();
-		authService.logout();
 		queryClient.clear();
+
+		// 2. Notify backend to clear httpOnly cookies
+		await authService.logout();
+
+		// 3. Redirect after server confirms
+		toast.success("Sesión cerrada", {
+			description: "Has cerrado sesión correctamente",
+		});
 		router.replace("/");
 	};
 }
