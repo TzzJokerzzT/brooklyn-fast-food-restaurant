@@ -63,14 +63,14 @@ export function useLogout() {
 	const logout = useAuthStore((s) => s.logout);
 
 	return async () => {
-		// 1. Clear local state immediately
+		// 1. Clear cookies on backend FIRST (must complete before refetch)
+		await authService.logout();
+
+		// 2. Now clear local state — useMe() will refetch and get 401
 		logout();
 		queryClient.clear();
 
-		// 2. Notify backend to clear httpOnly cookies
-		await authService.logout();
-
-		// 3. Redirect after server confirms
+		// 3. Redirect after cleanup
 		toast.success("Sesión cerrada", {
 			description: "Has cerrado sesión correctamente",
 		});
