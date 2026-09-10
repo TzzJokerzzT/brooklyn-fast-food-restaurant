@@ -1,5 +1,5 @@
 import { handleApiResponse } from "@/src/shared/services/query-helpers";
-import type { UserResponse } from "@/src/shared/services/types";
+import type { UserResponse } from "@/src/shared/types/services/user";
 
 import { useQuery } from "@tanstack/react-query";
 import { dashboardService } from "../services/dashboard.service";

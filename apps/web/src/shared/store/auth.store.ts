@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, devtools, persist } from "zustand/middleware";
-import type { UserResponse } from "../services/types";
+import type { UserResponse } from "../types/services/user";
 
 // ── Auth Store ──────────────────────────────────────────────
 // Manages authentication state and user data.

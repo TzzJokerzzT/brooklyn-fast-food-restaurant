@@ -1,5 +1,5 @@
 import { apiClient } from "@/src/shared/lib/axios";
-import type { ApiResponse } from "@/src/shared/services/types";
+import type { ApiResponse } from "@/src/shared/types/services/api-response";
 
 // ── Product Types ───────────────────────────────────────────
 
