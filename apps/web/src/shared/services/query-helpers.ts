@@ -1,4 +1,4 @@
-import type { ApiResponse } from "./types";
+import type { ApiResponse } from "../types/services/api-response";
 
 // ── Query Helpers ───────────────────────────────────────────
 // Eliminates the res.success ? res.data : null boilerplate

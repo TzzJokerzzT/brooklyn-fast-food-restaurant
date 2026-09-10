@@ -1,45 +1,13 @@
 import { apiClient } from "@/src/shared/lib/axios";
-import type { ApiResponse } from "@/src/shared/types/services/api-response";
 
-// ── Product Types ───────────────────────────────────────────
-
-export interface ProductResponse {
-	id: number;
-	productName: string;
-	productImage: string | null;
-	isPromotion: boolean;
-	price: number;
-	ingredients: string[];
-	createdAt: string;
-}
-
-export interface FindAllProductsParams {
-	page?: number;
-	limit?: number;
-	search?: string;
-	isPromotion?: boolean;
-}
-
-export interface PaginatedProducts {
-	products: ProductResponse[];
-	total: number;
-	page: number;
-	limit: number;
-}
-
-export interface CreateProductDTO {
-	productName: string;
-	isPromotion: boolean;
-	price: number;
-	ingredients: string[];
-}
-
-export interface UpdateProductDTO {
-	productName?: string;
-	isPromotion?: boolean;
-	price?: number;
-	ingredients?: string[];
-}
+import type { ApiResponse } from "../types/services/api-response";
+import type {
+	CreateProductDTO,
+	FindAllProductsParams,
+	PaginatedProducts,
+	ProductResponse,
+	UpdateProductDTO,
+} from "../types/services/product";
 
 // ── Product Service ─────────────────────────────────────────
 // CRUD completo. Endpoints de imagen usan multipart/form-data;

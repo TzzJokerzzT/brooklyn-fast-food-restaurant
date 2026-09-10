@@ -1,15 +1,15 @@
 import { showToast } from "@/src/shared/components/Toast";
+import { productsService } from "@/src/shared/services/product.service";
 import { handleApiResponse } from "@/src/shared/services/query-helpers";
-
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type {
 	CreateProductDTO,
 	FindAllProductsParams,
 	PaginatedProducts,
 	ProductResponse,
 	UpdateProductDTO,
-} from "../services/product.service";
-import { productsService } from "../services/product.service";
+} from "@/src/shared/types/services/product";
+
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 // ── Query Keys ──────────────────────────────────────────────
 

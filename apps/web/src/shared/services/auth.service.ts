@@ -1,6 +1,11 @@
 import { apiClient } from "@/src/shared/lib/axios";
 
-import type { ApiResponse, LoginDTO, LoginResponse, MeResponse } from "./types";
+import type { ApiResponse } from "../types/services/api-response";
+import type {
+	LoginDTO,
+	LoginResponse,
+	MeResponse,
+} from "../types/services/user";
 
 // ── Auth Service ────────────────────────────────────────────
 // Handles authentication API calls.
