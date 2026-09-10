@@ -34,35 +34,54 @@ Cada feature encapsula sus componentes, hooks, servicios y tipos de forma indepe
 ```
 src/
 ├── app/                              # Next.js App Router (rutas)
-│   ├── layout.tsx                    # Root layout (Providers, fuente Texturina, dark theme)
+│   ├── layout.tsx                    # Root layout (Providers, AppInitializer)
 │   ├── page.tsx                      # / → LandingPageView
 │   ├── globals.css                   # CSS variables, Tailwind theme, brand tokens
-│   └── register/
-│       └── page.tsx                  # /register → RegisterPageView
+│   ├── login/
+│   │   └── page.tsx                  # /login → LoginPageView
+│   ├── register/
+│   │   └── page.tsx                  # /register → RegisterPageView
+│   └── dashboard/
+│       ├── layout.tsx                # Dashboard layout (AuthGuard + DashboardLayout)
+│       ├── page.tsx                  # /dashboard → DashboardPageView
+│       └── products/
+│           ├── page.tsx              # /dashboard/products → ProductListPage
+│           ├── create/page.tsx       # /dashboard/products/create → ProductForm
+│           └── edit/page.tsx         # /dashboard/products/edit → ProductForm
 ├── src/
 │   ├── views/                        # Orchestrators de página (delgados, delegan a features)
 │   │   ├── LandingPageView.tsx
-│   │   └── RegisterPageView.tsx
+│   │   ├── LoginPageView.tsx
+│   │   ├── RegisterPageView.tsx
+│   │   ├── DashboardPageView.tsx
+│   │   └── ProductListPage.tsx
 │   ├── features/                     # Módulos Vertical Slice
 │   │   ├── landing/
-│   │   │   ├── components/           # HeroSection, MenuSection, EventsSection
-│   │   │   ├── hooks/                # useLanding (useState local)
-│   │   │   ├── services/             # fetchLanding (fetch API), mockData
-│   │   │   └── types/                # LandingState
+│   │   │   ├── components/           # HeroSection, MenuSection, EventsSection, ProductCard
+│   │   │   ├── hooks/                # useProductsList
+│   │   │   └── services/             # use-product
+│   │   ├── login/
+│   │   │   ├── components/           # LoginForm, LoginFields
+│   │   │   └── hooks/                # (usa useLogin de shared)
 │   │   ├── register/
 │   │   │   ├── components/           # RegisterForm, RegisterFields
-│   │   │   ├── hooks/                # useRegister (useMutation + toast)
-│   │   │   └── services/             # register.service.ts (POST /auth/register)
-│   │   └── login/                    # Scaffolding (TODO)
+│   │   │   ├── hooks/                # useRegister
+│   │   │   └── services/             # register.service.ts
+│   │   └── dashboard/
+│   │       ├── feature/
+│   │       │   ├── dashboard/        # DashboardView, StatCard, MenuControlTable, etc.
+│   │       │   └── products/         # ProductList, ProductForm, useProducts
+│   │       └── shared/               # AuthGuard, DashboardLayout, SideNavBar
 │   └── shared/                       # Código compartido entre features
-│       ├── components/               # Header, Footer, Layout, Toast, BasicInput, BasicButton
+│       ├── components/               # Header, Footer, Layout, Toast, BasicInput, BasicButton, SplashScreen, AppInitializer
 │       ├── hooks/                    # use-auth.ts, use-users.ts
-│       ├── services/                 # authService, usersService, types, query-helpers
-│       ├── lib/                      # axios.ts (apiClient, interceptors, token refresh)
-│       ├── store/                    # Zustand: useUIStore, useCartStore
-│       ├── providers/                # Providers (QueryProvider + Toast)
+│       ├── services/                 # authService, usersService, productsService, query-helpers
+│       ├── lib/                      # axios.ts (apiClient, interceptors), cookies.ts
+│       ├── store/                    # Zustand: useAuthStore, useUIStore, useCartStore, useProductFormStore
+│       ├── providers/                # Providers (QueryProvider + Toast + BfCacheHandler)
 │       ├── utils/                    # validations.ts
-│       └── types/                    # BasicInput, BasicButton props
+│       └── types/                    # BasicInput, BasicButton props, services types
+├── middleware.ts                     # Next.js middleware (route protection)
 └── tests/
 ```
 
@@ -108,22 +127,28 @@ bun feature:create menu-items
 | Componente | Archivo | Propósito |
 |------------|---------|-----------|
 | `Layout` | `layout.tsx` | Wrapper: Header + main + Footer |
-| `Header` | `Header.tsx` | Navbar fijo, logo, links de navegación, CTA "Ordenar Ahora" |
+| `Header` | `Header.tsx` | Navbar fijo, logo, links, botón logout |
 | `Footer` | `Footer.tsx` | Footer con links de navegación |
-| `Toast` / `showToast` | `Toast.tsx` | Sistema global de notificaciones (ToastQueue + CustomToast) |
+| `Toast` / `showToast` | `Toast.tsx` | Sistema global de notificaciones |
 | `BasicInput` | `BasicInput.tsx` | Wrapper de HeroUI TextField con validación |
 | `BasicButton` | `ui/BasicButton.tsx` | Botón HeroUI con estados pending/spinner |
-| `FormEnterAnimation` | `animation/FormEnterAnimation.tsx` | Animación staggered de entrada para formularios |
-| `LazyMotionComponent` | `animation/LazyMotionComponent.tsx` | Provider de LazyMotion con domAnimation |
+| `BasicAvatar` | `ui/BasicAvatar.tsx` | Avatar con iniciales |
+| `BasicSwitch` | `ui/BasicSwitch.tsx` | Toggle switch |
+| `BasicChip` | `ui/BasicChip.tsx` | Chip/tag para ingredientes |
+| `BasicCheckbox` | `ui/BasicCheckbox.tsx` | Checkbox |
+| `BasicSpinner` | `ui/BasicSpinner.tsx` | Spinner de carga |
+| `FormEnterAnimation` | `animation/FormEnterAnimation.tsx` | Animación staggered de entrada |
+| `AppInitializer` | `AppInitializer.tsx` | Splash screen mientras verifica auth |
+| `SplashScreen` | `SplashScreen.tsx` | Pantalla de carga con logo |
+| `BfCacheHandler` | `providers/bf-cache-handler.tsx` | Limpia estado en bfcache restore |
 
 ### Hooks
 
 | Hook | Archivo | Descripción |
 |------|---------|-------------|
 | `useMe` | `shared/hooks/use-auth.ts` | Obtiene usuario actual (GET /auth/me) |
-| `useLogin` | `shared/hooks/use-auth.ts` | Mutación POST /auth/login |
-| `useRegister` | `shared/hooks/use-auth.ts` | Mutación POST /auth/register (versión compartida) |
-| `useLogout` | `shared/hooks/use-auth.ts` | Limpia tokens + cache + redirect |
+| `useLogin` | `shared/hooks/use-auth.ts` | Mutación POST /auth/login → redirige a `/` |
+| `useLogout` | `shared/hooks/use-auth.ts` | Await backend + limpia Zustand + cache + redirect |
 | `useUsers` | `shared/hooks/use-users.ts` | Lista paginada de usuarios |
 | `useUser` | `shared/hooks/use-users.ts` | Detalle de usuario individual |
 | `useCreateUser` | `shared/hooks/use-users.ts` | Crear usuario |
@@ -132,13 +157,17 @@ bun feature:create menu-items
 | `useUpdateUserStatus` | `shared/hooks/use-users.ts` | PATCH /users/:id/status |
 | `useDeleteUser` | `shared/hooks/use-users.ts` | Eliminar usuario |
 | `useRegister` (feature) | `features/register/hooks/index.ts` | Register con toast + redirect |
+| `useDashboardUser` | `features/dashboard/hooks/` | Usuario para dashboard |
+| `useProductsList` | `features/landing/hooks/product.ts` | Lista de productos para landing |
+| `useProducts` | `features/dashboard/products/hooks/` | CRUD de productos para dashboard |
 
 ### Servicios
 
 | Servicio | Archivo | Endpoints |
 |----------|---------|-----------|
-| `authService` | `shared/services/auth.service.ts` | login, refresh, me, logout |
+| `authService` | `shared/services/auth.service.ts` | login, me, logout (cookies manejadas por backend) |
 | `usersService` | `shared/services/users.service.ts` | create, getAll, getById, update, updateRole, updateStatus, delete |
+| `productsService` | `shared/services/product.service.ts` | getAll, getById, create, createMany, update, delete, deleteMany |
 | `registerService` | `features/register/services/register.service.ts` | register (POST /auth/register) |
 
 ### Utils
@@ -146,7 +175,8 @@ bun feature:create menu-items
 | Util | Archivo | Funciones |
 |------|---------|-----------|
 | `validations` | `shared/utils/validations.ts` | `validateEmail`, `validatePassword`, `validatePasswordConfirm`, `validateName` |
-| `axios` | `shared/lib/axios.ts` | `apiClient` (interceptors, refresh queue), `tokenStorage`, `getErrorMessage` |
+| `axios` | `shared/lib/axios.ts` | `apiClient` (interceptors, refresh queue, withCredentials) |
+| `cookies` | `shared/lib/cookies.ts` | `COOKIE_KEYS` — constantes de nombres de cookies |
 | `query-helpers` | `shared/services/query-helpers.ts` | `handleApiResponse`, `ApiQueryError` |
 
 ### State Management
@@ -154,20 +184,76 @@ bun feature:create menu-items
 **Server State (TanStack React Query):**
 - `staleTime: 60s`, `gcTime: 5min`, `retry: 1`
 - Global `onError` en mutaciones → toast notifications
-- Query key factories por dominio: `authKeys`, `usersKeys`
+- Query key factories por dominio: `authKeys`, `usersKeys`, `productsKeys`
 - Optimistic updates via `setQueryData` en mutation success
 
 **Client State (Zustand):**
+- `useAuthStore` — `isAuthenticated`, `user`, `setUser`, `logout` (persistido a sessionStorage)
 - `useUIStore` — `isMenuOpen`, `isDarkMode` (persistido a localStorage)
 - `useCartStore` — `items[]`, `addItem`, `removeItem`, `updateQuantity`, `clearCart`, `total()` (persistido a localStorage)
+- `useProductFormStore` — Estado del formulario de productos (create/edit modes)
 - Ambos con `devtools` middleware para debugging
 
 ### Routing
 
-| Ruta | Archivo | Vista |
-|------|---------|-------|
-| `/` | `app/page.tsx` | `LandingPageView` → Hero + Menu + Events + Register |
-| `/register` | `app/register/page.tsx` | `RegisterPageView` → Formulario de registro |
+| Ruta | Archivo | Vista | Protección |
+|------|---------|-------|------------|
+| `/` | `app/page.tsx` | `LandingPageView` → Hero + Menu + Events | Pública |
+| `/login` | `app/login/page.tsx` | `LoginPageView` → Formulario de login | Solo no autenticados |
+| `/register` | `app/register/page.tsx` | `RegisterPageView` → Formulario de registro | Solo no autenticados |
+| `/dashboard` | `app/dashboard/page.tsx` | `DashboardPageView` → Panel admin | AuthGuard (admin, super-admin) |
+| `/dashboard/products` | `app/dashboard/products/page.tsx` | `ProductListPage` → Lista de productos | AuthGuard (admin, super-admin) |
+| `/dashboard/products/create` | `app/dashboard/products/create/page.tsx` | `ProductForm` → Crear producto | AuthGuard (admin, super-admin) |
+| `/dashboard/products/edit` | `app/dashboard/products/edit/page.tsx` | `ProductForm` → Editar producto | AuthGuard (admin, super-admin) |
+
+### Autenticación (httpOnly Cookies)
+
+El sistema usa **httpOnly cookies** para almacenar tokens — el frontend nunca accede a los tokens directamente.
+
+**Flujo de login:**
+1. Usuario envía `POST /auth/login` con email/password
+2. Backend valida credenciales, genera JWT access + refresh tokens
+3. Backend setea cookies httpOnly: `brooklyn_access_token` (15min) + `brooklyn_refresh_token` (7 días)
+4. Frontend recibe solo `{ user: UserResponse }` — sin tokens en el body
+5. `useLogin` guarda el usuario en Zustand + redirige a `/`
+
+**Flujo de refresh (automático):**
+1. Axios interceptor detecta 401 en cualquier request
+2. Llama a `POST /auth/refresh` con cookies httpOnly
+3. Backend valida refresh token, genera nuevos tokens, setea cookies
+4. Reintenta el request original
+
+**Flujo de logout:**
+1. `useLogout` llama a `POST /auth/logout` (await)
+2. Backend limpia cookies httpOnly
+3. Frontend limpia Zustand + React Query cache
+4. Redirige a `/`
+
+**Protección de rutas:**
+
+| Capa | Mecanismo | Verifica |
+|------|-----------|----------|
+| Next.js Middleware | `middleware.ts` | Existencia del cookie (autenticación básica) |
+| AuthGuard (client) | `AuthGuard.tsx` | Rol del usuario via `useMe()` — allowlist `["admin", "super-admin"]` |
+| Backend | `auth.middleware.ts` | JWT válido + `authorize([roles])` por ruta |
+
+### Dashboard
+
+Panel de administración con protección de roles.
+
+**Componentes:**
+- `SideNavBar` — Navegación lateral con items del menú + logout
+- `DashboardLayout` — Layout del dashboard (sidebar + contenido)
+- `AuthGuard` — Verifica autenticación + rol antes de renderizar
+- `StatCard` — Tarjetas de estadísticas
+- `MenuControlTable` — Tabla de control de menú
+- `ActivePromos` — Promociones activas
+- `LaunchEventForm` — Formulario de eventos
+
+**Gestión de productos:**
+- `ProductList` — Lista de productos con edición/eliminación inline
+- `ProductForm` — Formulario unificado para crear/editar productos
+- Soporte para creación individual y masiva (bulk upload)
 
 ---
 
@@ -363,23 +449,24 @@ Base: `/api/v1` (también disponible en `/api`)
 |--------|------|------|-----|------------|---------|
 | `GET` | `/health` | No | — | — | Health check (status, timestamp, uptime) |
 | `POST` | `/auth/register` | No | — | `validateRegister` (Zod) | `AuthController.register` |
-| `POST` | `/auth/login` | No | — | `validateLogin` (Zod) | `AuthController.login` |
-| `POST` | `/auth/refresh` | No | — | — | `AuthController.refresh` |
-| `GET` | `/auth/me` | Bearer JWT | Cualquier rol | — | `AuthController.me` |
-| `GET` | `/users` | Bearer JWT | admin (1,2) | — | `UsersController.getAll` (paginado, buscable) |
-| `GET` | `/users/:id` | Bearer JWT | admin (1,2) | — | `UsersController.getById` |
-| `POST` | `/users` | Bearer JWT | super-admin (1) | — | `UsersController.create` |
-| `PUT` | `/users/:id` | Bearer JWT | admin (1,2) | `validateUpdateUser` (Zod) | `UsersController.update` |
-| `PATCH` | `/users/:id/role` | Bearer JWT | super-admin (1) | — | `UsersController.updateRole` |
-| `PATCH` | `/users/:id/status` | Bearer JWT | admin (1,2) | — | `UsersController.updateStatus` |
-| `DELETE` | `/users/:id` | Bearer JWT | super-admin (1) | — | `UsersController.delete` |
+| `POST` | `/auth/login` | No | — | `validateLogin` (Zod) | `AuthController.login` (setea cookies httpOnly) |
+| `POST` | `/auth/refresh` | Cookie | — | — | `AuthController.refresh` (renueva cookies) |
+| `GET` | `/auth/me` | Cookie | Cualquier rol | — | `AuthController.me` |
+| `POST` | `/auth/logout` | Cookie | Cualquier rol | — | `AuthController.logout` (limpia cookies) |
+| `GET` | `/users` | Cookie | admin (1,2) | — | `UsersController.getAll` (paginado, buscable) |
+| `GET` | `/users/:id` | Cookie | admin (1,2) | — | `UsersController.getById` |
+| `POST` | `/users` | Cookie | super-admin (1) | — | `UsersController.create` |
+| `PUT` | `/users/:id` | Cookie | admin (1,2) | `validateUpdateUser` (Zod) | `UsersController.update` |
+| `PATCH` | `/users/:id/role` | Cookie | super-admin (1) | — | `UsersController.updateRole` |
+| `PATCH` | `/users/:id/status` | Cookie | admin (1,2) | — | `UsersController.updateStatus` |
+| `DELETE` | `/users/:id` | Cookie | super-admin (1) | — | `UsersController.delete` |
 | `GET` | `/products` | No | — | — | `ProductsController.getAll` (paginado, buscable) |
 | `GET` | `/products/:id` | No | — | — | `ProductsController.getById` |
-| `POST` | `/products` | Bearer JWT | admin (1,2) | `validateCreateProduct` (Zod) + multer | `ProductsController.create` (acepta imagen) |
-| `POST` | `/products/bulk` | Bearer JWT | admin (1,2) | — | `ProductsController.createMany` |
-| `PUT` | `/products/:id` | Bearer JWT | admin (1,2) | `validateUpdateProduct` (Zod) + multer | `ProductsController.update` (acepta imagen) |
-| `DELETE` | `/products/:id` | Bearer JWT | admin (1,2) | — | `ProductsController.delete` |
-| `DELETE` | `/products/bulk` | Bearer JWT | admin (1,2) | — | `ProductsController.deleteMany` |
+| `POST` | `/products` | Cookie | admin (1,2) | `validateCreateProduct` (Zod) + multer | `ProductsController.create` (acepta imagen) |
+| `POST` | `/products/bulk` | Cookie | admin (1,2) | — | `ProductsController.createMany` |
+| `PUT` | `/products/:id` | Cookie | admin (1,2) | `validateUpdateProduct` (Zod) + multer | `ProductsController.update` (acepta imagen) |
+| `DELETE` | `/products/:id` | Cookie | admin (1,2) | — | `ProductsController.delete` |
+| `DELETE` | `/products/bulk` | Cookie | admin (1,2) | — | `ProductsController.deleteMany` |
 
 ### Swagger API Docs
 
@@ -411,10 +498,10 @@ http://localhost:3001/api/docs
 Para probar endpoints protegidos (como `/users` o `/auth/me`):
 
 1. Ejecuta `POST /auth/login` con credenciales válidas
-2. Copia el `accessToken` de la respuesta
-3. Haz clic en el botón **Authorize** (arriba a la derecha)
-4. Pega el token en el campo: `Bearer <tu-access-token>`
-5. Ahora puedes ejecutar endpoints protegidos sin recibir 401
+2. Las cookies httpOnly se guardan automáticamente en el navegador
+3. Ahora puedes ejecutar endpoints protegidos sin recibir 401
+
+**Nota:** Swagger UI no envía cookies automáticamente. Para testing completo, usa el frontend o herramientas como Postman/Insomnia con cookies habilitadas.
 
 **Archivos:**
 
@@ -456,6 +543,7 @@ Para probar endpoints protegidos (como `/users` o `/auth/me`):
 3. `morgan('dev')` — Logging HTTP
 4. `express.json()` — Body parsing JSON
 5. `express.urlencoded()` — Body parsing URL-encoded
+6. `cookieParser()` — Parseo de cookies httpOnly
 
 **Per-ruta:**
 
