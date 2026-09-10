@@ -1,13 +1,13 @@
 import { apiClient } from "@/src/shared/lib/axios";
 
+import type { ApiResponse } from "../types/services/api-response";
 import type {
-	ApiResponse,
 	CreateUserDTO,
 	FindAllUsersParams,
 	PaginatedUsers,
 	UpdateUserDTO,
 	UserResponse,
-} from "./types";
+} from "../types/services/user";
 
 // ── Users Service ───────────────────────────────────────────
 // Admin user management API calls
