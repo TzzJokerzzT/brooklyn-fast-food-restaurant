@@ -117,6 +117,7 @@ bun feature:create menu-items
 | **Client State** | Zustand | 5.0.15 | useUIStore (menu, dark mode), useCartStore (carrito) — persistidos a localStorage |
 | **Validación** | Valibot | 1.4.2 | Validación de formularios |
 | **Testing** | Vitest + Testing Library | 4.1.11 | Unit tests con jsdom |
+| **Test DB** | SQLite in-memory | — | Tests aislados sin PostgreSQL |
 | **E2E Testing** | Cypress | 15.21.0 | Tests end-to-end |
 | **Linting** | Biome | 2.5.10 | Linting + formatting (tabs, double quotes, semicolons) |
 | **Monorepo** | Turborepo | 2.10.11 | Build caching, parallel execution |
@@ -607,8 +608,11 @@ bun dev
 | `bun dev:api` | Inicia solo el backend |
 | `bun build` | Construye todos los apps |
 | `bun lint` | Verifica código con Biome |
+| `bun format` | Formatea código con Biome |
 | `bun typecheck` | Valida tipos TypeScript |
-| `bun test` | Ejecuta tests con Vitest |
+| `bun test` | Ejecuta todos los tests con Vitest |
+| `bun test:watch` | Tests en modo watch |
+| `bun test:coverage` | Tests con reporte de cobertura |
 
 #### Frontend (`apps/web`)
 
@@ -624,6 +628,8 @@ bun dev
 |---------|-------------|
 | `bun run dev` | Inicia servidor con hot-reload |
 | `bun run build` | Compila TypeScript |
+| `bun run test` | Tests unitarios con Vitest |
+| `bun run test:watch` | Tests en modo watch |
 | `bun run db:generate` | Genera Prisma Client |
 | `bun run db:push` | Sincroniza schema con la DB |
 | `bun run db:migrate` | Crea migración |
@@ -683,13 +689,81 @@ CLOUDINARY_API_SECRET=your_api_secret
 - Formatos permitidos: jpg, png, gif, webp, etc.
 - Transformación automática: resize a 800x800 (limit) + quality auto
 
+---
+
+## Testing
+
+### Estrategia
+
+- **Frontend**: Vitest + React Testing Library + jsdom (176 tests)
+- **Backend**: Vitest + SQLite in-memory + Prisma (36 tests)
+- **Total**: 212 tests — todos los checks pasan (lint, typecheck, tests, build)
+
+### Infraestructura de Tests
+
+**Frontend (`apps/web`):**
+- Vitest con happy-dom
+- React Testing Library para tests de componentes
+- Mocks de servicios API con vi.mock()
+
+**Backend (`apps/api`):**
+- Vitest con SQLite in-memory (tests aislados, sin PostgreSQL)
+- Prisma Client con `DATABASE_URL="file:memory:"`
+- Cada test suite crea un SchemaClient nuevo → aislamiento completo
+- Fixtures para datos de prueba (roles, usuarios)
+- Setup en `tests/test-db-setup.ts`
+
+### Comandos de Testing
+
+```bash
+# Ejecutar todos los tests
+bun test
+
+# Solo frontend
+bun run test --filter=web
+
+# Solo backend
+bun run test --filter=api
+
+# Tests en modo watch
+bun run test:watch
+
+# Tests con cobertura
+bun run test:coverage
+
+# Tests con UI interactiva
+bun run test:ui
+```
+
+### Pre-push Hook
+
+El pre-push hook ejecuta la cadena completa antes de cada push:
+
+```bash
+# 1. Lint (Biome)
+bunx biome check .
+
+# 2. Typecheck (TypeScript)
+bun typecheck
+
+# 3. Tests (Vitest)
+bun test
+
+# 4. Build (Turborepo)
+bun build
+```
+
+Si alguno falla, el push se bloquea.
+
+---
+
 ## Git Hooks
 
 | Hook | Qué hace |
 |------|----------|
 | `pre-commit` | Ejecuta Biome linter en archivos staged |
 | `commit-msg` | Valida formato de conventional commits |
-| `pre-push` | Verifica TypeScript + build |
+| `pre-push` | Verifica lint + typecheck + tests + build |
 
 ### Formato de commits
 
