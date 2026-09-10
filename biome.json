@@ -9,6 +9,23 @@
 		"ignoreUnknown": false,
 		"includes": ["**", "!node_modules", "!dist", "!coverage"]
 	},
+	"overrides": [
+		{
+			"includes": ["**/*.css"],
+			"css": {
+				"parser": {
+					"cssModules": false,
+					"tailwindDirectives": true
+				},
+				"formatter": {
+					"enabled": false
+				},
+				"linter": {
+					"enabled": false
+				}
+			}
+		}
+	],
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab",
