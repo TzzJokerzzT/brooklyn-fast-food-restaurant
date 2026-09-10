@@ -7,6 +7,9 @@ export default defineConfig({
 		environment: "node",
 		include: ["tests/**/*.test.ts"],
 		setupFiles: ["tests/setup.ts"],
+		// Run test files sequentially to prevent race conditions
+		// with shared in-memory SQLite database (cache=shared).
+		fileParallelism: false,
 	},
 	resolve: {
 		alias: {
