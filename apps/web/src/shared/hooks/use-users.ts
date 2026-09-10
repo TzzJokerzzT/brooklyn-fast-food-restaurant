@@ -81,13 +81,7 @@ export function useUpdateUser() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({
-			id,
-			dto,
-		}: {
-			id: number;
-			dto: UpdateUserDTO;
-		}) =>
+		mutationFn: ({ id, dto }: { id: number; dto: UpdateUserDTO }) =>
 			usersService.update(id, dto).then(handleApiResponse),
 		onSuccess: (data, variables) => {
 			queryClient.setQueryData(usersKeys.detail(variables.id), data.user);
@@ -102,13 +96,8 @@ export function useUpdateUserRole() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({
-			id,
-			roleId,
-		}: {
-			id: number;
-			roleId: number;
-		}) => usersService.updateRole(id, roleId).then(handleApiResponse),
+		mutationFn: ({ id, roleId }: { id: number; roleId: number }) =>
+			usersService.updateRole(id, roleId).then(handleApiResponse),
 		onSuccess: (data, variables) => {
 			queryClient.setQueryData(usersKeys.detail(variables.id), data.user);
 			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
@@ -122,13 +111,8 @@ export function useUpdateUserStatus() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({
-			id,
-			isActive,
-		}: {
-			id: number;
-			isActive: boolean;
-		}) => usersService.updateStatus(id, isActive).then(handleApiResponse),
+		mutationFn: ({ id, isActive }: { id: number; isActive: boolean }) =>
+			usersService.updateStatus(id, isActive).then(handleApiResponse),
 		onSuccess: (data, variables) => {
 			queryClient.setQueryData(usersKeys.detail(variables.id), data.user);
 			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
@@ -142,8 +126,7 @@ export function useDeleteUser() {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: (id: number) =>
-			usersService.delete(id).then(handleApiResponse),
+		mutationFn: (id: number) => usersService.delete(id).then(handleApiResponse),
 		onSuccess: (_data, id) => {
 			queryClient.removeQueries({ queryKey: usersKeys.detail(id) });
 			queryClient.invalidateQueries({ queryKey: usersKeys.lists() });
