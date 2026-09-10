@@ -1,5 +1,8 @@
 "use client";
 
+import BasicButton from "@/src/shared/components/ui/BasicButton";
+import BasicCheckbox from "@/src/shared/components/ui/BasicCheckbox";
+
 interface MenuItem {
 	id: string;
 	name: string;
@@ -52,10 +55,10 @@ export default function MenuControlTable() {
 				<h3 className="font-display-xl-mobile text-display-xl-mobile uppercase text-on-surface">
 					MENU CTRL
 				</h3>
-				<button className="btn-secondary py-2 px-4 text-sm flex items-center gap-2">
+				<BasicButton className="btn-secondary py-2 px-4 text-sm flex items-center gap-2">
 					<span className="material-symbols-outlined text-sm">add</span> ADD
 					ITEM
-				</button>
+				</BasicButton>
 			</div>
 
 			{/* Table */}
@@ -114,18 +117,19 @@ export default function MenuControlTable() {
 												: ""
 										}`}
 									>
-										<input
-											type="checkbox"
-											defaultChecked={item.featured}
-											className="toggle-checkbox absolute block w-5 h-5 rounded-none bg-black border-2 border-white/40 appearance-none cursor-pointer z-10 top-0 left-0 transition-transform duration-200 ease-in-out translate-x-5 checked:border-mustard checked:bg-mustard"
-										/>
-										<label className="toggle-label block overflow-hidden h-5 bg-white/10 cursor-pointer border border-white/20 transition-colors duration-200" />
+										<BasicCheckbox />
+										{/* <input */}
+										{/* 	type="checkbox" */}
+										{/* 	defaultChecked={item.featured} */}
+										{/* 	className="toggle-checkbox absolute block w-5 h-5 rounded-none bg-black border-2 border-white/40 appearance-none cursor-pointer z-10 top-0 left-0 transition-transform duration-200 ease-in-out translate-x-5 checked:border-mustard checked:bg-mustard" */}
+										{/* /> */}
+										{/* <label className="toggle-label block overflow-hidden h-5 bg-white/10 cursor-pointer border border-white/20 transition-colors duration-200" /> */}
 									</div>
 								</td>
 								<td className="p-4 text-right">
-									<button className="text-secondary hover:text-white">
+									<BasicButton className="text-secondary hover:text-white">
 										<span className="material-symbols-outlined">edit</span>
-									</button>
+									</BasicButton>
 								</td>
 							</tr>
 						))}
