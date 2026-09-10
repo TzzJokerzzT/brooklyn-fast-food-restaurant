@@ -154,8 +154,13 @@ describe("UserRepository", () => {
 		});
 
 		it("should filter by search term", async () => {
+			// First verify data exists, then search
+			const all = await userRepository.findAll({ page: 1, limit: 10 });
+			expect(all.users.length).toBeGreaterThanOrEqual(2);
+
 			const result = await userRepository.findAll({ search: "Alice" });
 
+			expect(result.users.length).toBeGreaterThanOrEqual(1);
 			expect(result.users.some((u) => u.userName === "Alice")).toBe(true);
 		});
 	});

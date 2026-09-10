@@ -8,9 +8,9 @@ export interface Login {
 	updatedAt: string;
 }
 
-export type CreateLoginDTO = {};
+export type CreateLoginDTO = Record<string, unknown>;
 
-export type UpdateLoginDTO = {};
+export type UpdateLoginDTO = Record<string, unknown>;
 
 export interface FindAllLoginParams {
 	page?: number;

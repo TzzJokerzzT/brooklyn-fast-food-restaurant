@@ -171,16 +171,17 @@ describe("AuthService", () => {
 
 	describe("refreshToken", () => {
 		it("should refresh tokens with valid refresh token", async () => {
+			const email = `test-refresh-${Date.now()}@example.com`;
 			await authService.register({
 				userName: "Refresh",
 				lastName: "Test",
-				email: `test-refresh-${Date.now()}@example.com`,
+				email,
 				password: "Password123",
 			});
 
 			// Login to get tokens
 			const loginResult = await authService.login({
-				email: `test-refresh-${Date.now()}@example.com`,
+				email,
 				password: "Password123",
 			});
 

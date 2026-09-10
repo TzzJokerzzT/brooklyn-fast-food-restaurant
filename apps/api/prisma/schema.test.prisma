@@ -1,0 +1,90 @@
+// ── Test Schema (SQLite in-memory) ─────────────────────────
+// Used only by Vitest tests. Mirrors the PostgreSQL schema
+// exactly (including @map directives) but uses SQLite-compatible
+// types (no String[], no @db.Text).
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+// ── Roles ────────────────────────────────────────────────────
+model Role {
+  id    Int      @id @default(autoincrement())
+  name  String   @unique
+
+  users User[]
+
+  @@map("roles")
+}
+
+// ── Users ────────────────────────────────────────────────────
+model User {
+  id           Int      @id @default(autoincrement())
+  userName     String   @map("user_name")
+  lastName     String   @map("last_name")
+  email        String   @unique
+  password     String
+  address      String?
+  phoneNumber  String?  @map("phone_number")
+  isActive     Boolean  @default(true) @map("is_active")
+  lastLoginAt  DateTime? @map("last_login_at")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  roleId     Int    @map("role_id")
+  role       Role   @relation(fields: [roleId], references: [id])
+
+  purchases Purchase[]
+
+  @@index([email])
+  @@index([roleId])
+  @@map("users")
+}
+
+// ── Products (minimal for FK, ingredients as JSON string) ────
+model Product {
+  id           Int      @id @default(autoincrement())
+  productName  String   @map("product_name")
+  productImage String?  @map("product_image")
+  isPromotion  Boolean  @default(false) @map("is_promotion")
+  price        Float
+  ingredients  String   @default("[]")
+  createdAt    DateTime @default(now()) @map("created_at")
+  updatedAt    DateTime @updatedAt @map("updated_at")
+
+  purchases Purchase[]
+
+  @@map("products")
+}
+
+// ── Purchases ────────────────────────────────────────────────
+model Purchase {
+  id           Int      @id @default(autoincrement())
+  quantity     Int      @default(1)
+  purchaseDate DateTime @default(now()) @map("purchase_date")
+
+  userId    Int    @map("user_id")
+  user      User   @relation(fields: [userId], references: [id])
+
+  productId Int     @map("product_id")
+  product   Product @relation(fields: [productId], references: [id])
+
+  @@map("purchases")
+}
+
+// ── Events ───────────────────────────────────────────────────
+model Event {
+  id            Int      @id @default(autoincrement())
+  eventName     String   @map("event_name")
+  description   String?
+  eventImage    String?  @map("event_image")
+  eventDateFrom DateTime @map("event_date_from")
+  eventDateTo   DateTime @map("event_date_to")
+
+  @@map("events")
+}
