@@ -32,6 +32,7 @@ vi.mock("@heroui/react", () => ({
 			{...props}
 		/>
 	),
+	// biome-ignore lint/a11y/noLabelWithoutControl: test mock, not a real form
 	Label: ({ children }: any) => <label>{children}</label>,
 	FieldError: () => <span data-testid="field-error" />,
 }));
