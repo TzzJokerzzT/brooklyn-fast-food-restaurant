@@ -39,7 +39,7 @@
 		"apps/*"
 	],
 	"simple-git-hooks": {
-		"pre-commit": "bunx biome check --write --staged",
+		"pre-commit": "bunx biome check --write --staged --no-errors-on-unmatched",
 		"commit-msg": "sh scripts/commit-lint.sh $1",
 		"pre-push": "sh scripts/pre-push.sh"
 	},
