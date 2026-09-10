@@ -1,5 +1,7 @@
 "use client";
 
+import BasicInput from "@/src/shared/components/BasicInput";
+
 export default function LaunchEventForm() {
 	return (
 		<div className="glass-panel p-6 flex flex-col">
@@ -8,34 +10,27 @@ export default function LaunchEventForm() {
 			</h3>
 			<form className="space-y-6">
 				<div className="relative">
-					<label className="font-label-sm text-label-sm text-secondary uppercase block mb-1">
-						EVENT NAME
-					</label>
-					<input
-						className="input-industrial"
-						placeholder="e.g. FLASH DROP: SPICY AF"
-						type="text"
+					<BasicInput
+						labelText="Nombre del evento"
+						placeholderText="Nombre del evento"
+						name="event-name"
 					/>
 				</div>
 				<div className="grid grid-cols-2 gap-4">
 					<div className="relative">
-						<label className="font-label-sm text-label-sm text-secondary uppercase block mb-1">
-							DATE
-						</label>
-						<input
-							className="input-industrial"
-							placeholder="MM/DD/YYYY"
-							type="text"
+						<BasicInput
+							type="date"
+							labelText="Fecha del evento"
+							placeholderText="Fecha del evento"
+							name="event-date"
 						/>
 					</div>
 					<div className="relative">
-						<label className="font-label-sm text-label-sm text-secondary uppercase block mb-1">
-							TIME
-						</label>
-						<input
-							className="input-industrial"
-							placeholder="HH:MM (24H)"
-							type="text"
+						<BasicInput
+							type="hour"
+							labelText="Hora del evento"
+							placeholderText="Hora del evento"
+							name="event-hour"
 						/>
 					</div>
 				</div>
