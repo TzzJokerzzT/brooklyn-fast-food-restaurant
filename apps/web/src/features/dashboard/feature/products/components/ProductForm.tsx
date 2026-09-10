@@ -267,231 +267,231 @@ function ProductFormInner() {
 	return (
 		<div className="glass-panel p-6">
 			{/* Header */}
-				<div className="flex justify-between items-center mb-6 border-b border-white/20 pb-4">
-					<h3 className="font-headline-lg-mobile text-headline-lg-mobile uppercase text-on-surface">
-						{isEditMode ? "EDITAR PRODUCTO" : "CREAR PRODUCTO"}
-					</h3>
-					{!isEditMode && (
-						<div className="flex items-center gap-2">
-							<BasicButton
-								type="button"
-								onPress={() => setMode("single")}
-								className={`rounded-2xl font-label-bold uppercase transition-colors ${
-									mode === "single"
-										? "bg-mustard text-black"
-										: "bg-white/10 text-white hover:bg-white/20"
-								}`}
-							>
-								SINGLE
-							</BasicButton>
-							<BasicButton
-								type="button"
-								onPress={() => setMode("bulk")}
-								className={`font-label-bold uppercase transition-colors ${
-									mode === "bulk"
-										? "bg-mustard text-black"
-										: "bg-white/10 text-white hover:bg-white/20"
-								}`}
-							>
-								BULK
-							</BasicButton>
-						</div>
-					)}
-				</div>
-
-				{error && (
-					<div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-label-sm">
-						{error}
+			<div className="flex justify-between items-center mb-6 border-b border-white/20 pb-4">
+				<h3 className="font-headline-lg-mobile text-headline-lg-mobile uppercase text-on-surface">
+					{isEditMode ? "EDITAR PRODUCTO" : "CREAR PRODUCTO"}
+				</h3>
+				{!isEditMode && (
+					<div className="flex items-center gap-2">
+						<BasicButton
+							type="button"
+							onPress={() => setMode("single")}
+							className={`rounded-2xl font-label-bold uppercase transition-colors ${
+								mode === "single"
+									? "bg-mustard text-black"
+									: "bg-white/10 text-white hover:bg-white/20"
+							}`}
+						>
+							SINGLE
+						</BasicButton>
+						<BasicButton
+							type="button"
+							onPress={() => setMode("bulk")}
+							className={`font-label-bold uppercase transition-colors ${
+								mode === "bulk"
+									? "bg-mustard text-black"
+									: "bg-white/10 text-white hover:bg-white/20"
+							}`}
+						>
+							BULK
+						</BasicButton>
 					</div>
 				)}
+			</div>
 
-				<form onSubmit={handleSubmit} className="space-y-6">
-					{/* Product Items */}
-					<div className="space-y-8">
-						{items.map((item, index) => (
-							<div key={`product-${mode}-${index}`}>
-								{/* Bulk item header */}
-								{!isEditMode && mode === "bulk" && (
-									<div className="flex justify-between items-center mb-4">
-										<span className="font-label-bold text-label-bold text-mustard text-xs">
-											PRODUCT #{String(index + 1).padStart(2, "0")}
-										</span>
-										{items.length > 1 && (
-											<button
-												type="button"
-												onClick={() => removeItem(index)}
-												className="text-red-400 hover:text-red-300 text-xs font-label-bold"
-											>
-												REMOVE
-											</button>
-										)}
-									</div>
-								)}
+			{error && (
+				<div className="mb-4 p-3 bg-red-500/10 border border-red-500/30 text-red-400 text-sm font-label-sm">
+					{error}
+				</div>
+			)}
 
-								<div
-									className={`p-4 bg-black border ${
-										!isEditMode && mode === "bulk"
-											? "border-white/10"
-											: "border-white/20"
-									}`}
-								>
-									{/* Image */}
-									<Dropzone
-										label="Imagen del producto"
-										file={item.productImage}
-										existingImageUrl={item.existingImageUrl}
-										onChange={(file: File | null) =>
-											updateItem(index, {
-												productImage: file,
-												existingImageUrl: null,
-											})
-										}
-										helperText={
-											isEditMode
-												? "Dejar vacío para mantener la imagen actual"
-												: "Arrastra o haz clic para seleccionar"
+			<form onSubmit={handleSubmit} className="space-y-6">
+				{/* Product Items */}
+				<div className="space-y-8">
+					{items.map((item, index) => (
+						<div key={`product-${mode}-${index}`}>
+							{/* Bulk item header */}
+							{!isEditMode && mode === "bulk" && (
+								<div className="flex justify-between items-center mb-4">
+									<span className="font-label-bold text-label-bold text-mustard text-xs">
+										PRODUCT #{String(index + 1).padStart(2, "0")}
+									</span>
+									{items.length > 1 && (
+										<button
+											type="button"
+											onClick={() => removeItem(index)}
+											className="text-red-400 hover:text-red-300 text-xs font-label-bold"
+										>
+											REMOVE
+										</button>
+									)}
+								</div>
+							)}
+
+							<div
+								className={`p-4 bg-black border ${
+									!isEditMode && mode === "bulk"
+										? "border-white/10"
+										: "border-white/20"
+								}`}
+							>
+								{/* Image */}
+								<Dropzone
+									label="Imagen del producto"
+									file={item.productImage}
+									existingImageUrl={item.existingImageUrl}
+									onChange={(file: File | null) =>
+										updateItem(index, {
+											productImage: file,
+											existingImageUrl: null,
+										})
+									}
+									helperText={
+										isEditMode
+											? "Dejar vacío para mantener la imagen actual"
+											: "Arrastra o haz clic para seleccionar"
+									}
+								/>
+
+								{/* Name */}
+								<div className="mt-4">
+									<BasicInput
+										labelText="Nombre del producto"
+										placeholderText="e.g. THE BROOKLYN BRUISER"
+										type="text"
+										name="productName"
+										value={item.productName}
+										onChange={(e) =>
+											updateItem(index, { productName: e.target.value })
 										}
 									/>
+								</div>
 
-									{/* Name */}
-									<div className="mt-4">
-										<BasicInput
-											labelText="Nombre del producto"
-											placeholderText="e.g. THE BROOKLYN BRUISER"
-											type="text"
-											name="productName"
-											value={item.productName}
-											onChange={(e) =>
-												updateItem(index, { productName: e.target.value })
-											}
-										/>
-									</div>
+								{/* Price */}
+								<div className="mt-4">
+									<BasicInput
+										labelText="Precio (USD)"
+										placeholderText="0.00"
+										type="text"
+										name="price"
+										value={String(item.price || "")}
+										onChange={(e) =>
+											updateItem(index, {
+												price: Number.parseFloat(e.target.value) || 0,
+											})
+										}
+									/>
+								</div>
 
-									{/* Price */}
-									<div className="mt-4">
-										<BasicInput
-											labelText="Precio (USD)"
-											placeholderText="0.00"
-											type="text"
-											name="price"
-											value={String(item.price || "")}
-											onChange={(e) =>
-												updateItem(index, {
-													price: Number.parseFloat(e.target.value) || 0,
-												})
-											}
-										/>
-									</div>
+								{/* Promotion */}
+								<div className="flex items-center justify-between py-3 border-b border-white/20 mt-4">
+									<BasicSwitch
+										className={`rounded-xl transition-colors ${
+											item.isPromotion ? "bg-mustard" : "bg-white/20"
+										}`}
+										onPress={() =>
+											updateItem(index, { isPromotion: !item.isPromotion })
+										}
+										isSelected={item.isPromotion}
+									>
+										En Promoción
+									</BasicSwitch>
+								</div>
 
-									{/* Promotion */}
-									<div className="flex items-center justify-between py-3 border-b border-white/20 mt-4">
-										<BasicSwitch
-											className={`rounded-xl transition-colors ${
-												item.isPromotion ? "bg-mustard" : "bg-white/20"
-											}`}
-											onPress={() =>
-												updateItem(index, { isPromotion: !item.isPromotion })
-											}
-											isSelected={item.isPromotion}
-										>
-											En Promoción
-										</BasicSwitch>
-									</div>
-
-									{/* Ingredients */}
-									<div className="mt-4">
-										<div className="flex gap-2 mb-3">
-											<div className="flex-1">
-												<BasicInput
-													labelText="Ingredientes"
-													placeholderText="Escribe y presiona Enter"
-													type="text"
-													name="ingredients"
-													value={ingredientInput}
-													onChange={(e) => setIngredientInput(e.target.value)}
-													onKeyDown={(e) => {
-														if (e.key === "Enter") {
-															e.preventDefault();
-															addIngredient(index);
-														}
-													}}
-													isRequired={false}
-												/>
-											</div>
-											<BasicButton
-												type="button"
-												onPress={() => addIngredient(index)}
-												className="mt-6"
-												isIconOnly
-											>
-												<CirclePlus size={16} />
-											</BasicButton>
+								{/* Ingredients */}
+								<div className="mt-4">
+									<div className="flex gap-2 mb-3">
+										<div className="flex-1">
+											<BasicInput
+												labelText="Ingredientes"
+												placeholderText="Escribe y presiona Enter"
+												type="text"
+												name="ingredients"
+												value={ingredientInput}
+												onChange={(e) => setIngredientInput(e.target.value)}
+												onKeyDown={(e) => {
+													if (e.key === "Enter") {
+														e.preventDefault();
+														addIngredient(index);
+													}
+												}}
+												isRequired={false}
+											/>
 										</div>
-
-										{item.ingredients.length > 0 && (
-											<div className="flex flex-wrap gap-2">
-												{item.ingredients.map((ingredient) => (
-													<BasicChip
-														key={ingredient}
-														className="bg-mustard/20 border border-mustard/40 text-mustard text-xs font-label-bold cursor-pointer hover:bg-mustard/60 transition-colors"
-														onClick={() => removeIngredient(index, ingredient)}
-														icon={<X size={12} />}
-													>
-														{ingredient}
-													</BasicChip>
-												))}
-											</div>
-										)}
+										<BasicButton
+											type="button"
+											onPress={() => addIngredient(index)}
+											className="mt-6"
+											isIconOnly
+										>
+											<CirclePlus size={16} />
+										</BasicButton>
 									</div>
+
+									{item.ingredients.length > 0 && (
+										<div className="flex flex-wrap gap-2">
+											{item.ingredients.map((ingredient) => (
+												<BasicChip
+													key={ingredient}
+													className="bg-mustard/20 border border-mustard/40 text-mustard text-xs font-label-bold cursor-pointer hover:bg-mustard/60 transition-colors"
+													onClick={() => removeIngredient(index, ingredient)}
+													icon={<X size={12} />}
+												>
+													{ingredient}
+												</BasicChip>
+											))}
+										</div>
+									)}
 								</div>
 							</div>
-						))}
-					</div>
+						</div>
+					))}
+				</div>
 
-					{/* Add item button (bulk mode only, create) */}
-					{!isEditMode && mode === "bulk" && (
-						<BasicButton
-							type="button"
-							onPress={addItem}
-							isDisabled={isSubmitting}
-							className="w-full py-3 border border-dashed bg-transparent border-white/20 text-white/60 hover:border-mustard hover:text-mustard transition-colors font-label-bold text-label-bold text-sm uppercase disabled:opacity-50"
-						>
-							+ ADD ANOTHER PRODUCT
-						</BasicButton>
-					)}
+				{/* Add item button (bulk mode only, create) */}
+				{!isEditMode && mode === "bulk" && (
+					<BasicButton
+						type="button"
+						onPress={addItem}
+						isDisabled={isSubmitting}
+						className="w-full py-3 border border-dashed bg-transparent border-white/20 text-white/60 hover:border-mustard hover:text-mustard transition-colors font-label-bold text-label-bold text-sm uppercase disabled:opacity-50"
+					>
+						+ ADD ANOTHER PRODUCT
+					</BasicButton>
+				)}
 
-					{/* Actions */}
-					<div className="flex gap-4 pt-4 border-t border-white/20">
-						<BasicButton
-							type="button"
-							onPress={resetForm}
-							isDisabled={isSubmitting}
-							className="btn-secondary flex-1"
-						>
-							{isEditMode ? "Restaurar" : "Iniciar de nuevo"}
-						</BasicButton>
-						<BasicButton
-							type="submit"
-							isDisabled={isSubmitting}
-							className="btn-primary flex-1 flex justify-center items-center gap-2"
-							isPending={isSubmitting}
-						>
-							{isSubmitting ? (
-								isEditMode ? (
-									"Guardando..."
-								) : (
-									"Creando..."
-								)
-							) : isEditMode ? (
-								<div className="flex items-center gap-2">
-									<Save className="w-5 h-5" />
-									Guardar Cambios
-								</div>
+				{/* Actions */}
+				<div className="flex gap-4 pt-4 border-t border-white/20">
+					<BasicButton
+						type="button"
+						onPress={resetForm}
+						isDisabled={isSubmitting}
+						className="btn-secondary flex-1"
+					>
+						{isEditMode ? "Restaurar" : "Iniciar de nuevo"}
+					</BasicButton>
+					<BasicButton
+						type="submit"
+						isDisabled={isSubmitting}
+						className="btn-primary flex-1 flex justify-center items-center gap-2"
+						isPending={isSubmitting}
+					>
+						{isSubmitting ? (
+							isEditMode ? (
+								"Guardando..."
 							) : (
-								<div className="flex items-center gap-2">
-									<CirclePlus className="w-5 h-5" />
-									{mode === "single"
-										? "Crear producto"
+								"Creando..."
+							)
+						) : isEditMode ? (
+							<div className="flex items-center gap-2">
+								<Save className="w-5 h-5" />
+								Guardar Cambios
+							</div>
+						) : (
+							<div className="flex items-center gap-2">
+								<CirclePlus className="w-5 h-5" />
+								{mode === "single"
+									? "Crear producto"
 									: `Crear ${items.length} productos`}
 							</div>
 						)}
