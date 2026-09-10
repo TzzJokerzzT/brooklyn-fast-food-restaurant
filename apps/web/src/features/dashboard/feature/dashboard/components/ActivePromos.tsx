@@ -1,5 +1,7 @@
 "use client";
 
+import BasicButton from "@/src/shared/components/ui/BasicButton";
+
 interface Promo {
 	code: string;
 	description: string;
@@ -70,18 +72,18 @@ export default function ActivePromos() {
 								<span className="font-label-sm text-label-sm text-secondary">
 									USAGE: {promo.usage.toLocaleString()}
 								</span>
-								<button className="text-red-500 font-label-bold text-label-bold text-[10px] hover:underline">
+								<BasicButton className="text-red-500 font-label-bold text-label-bold text-[10px] hover:underline">
 									TERMINATE
-								</button>
+								</BasicButton>
 							</div>
 						</div>
 					))}
 				</div>
 
 				{/* New Promo Button */}
-				<button className="btn-secondary mt-6 w-full text-sm">
+				<BasicButton className="btn-secondary mt-6 w-full text-sm">
 					NEW PROMO CODE
-				</button>
+				</BasicButton>
 			</div>
 		</section>
 	);
