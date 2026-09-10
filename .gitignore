@@ -33,6 +33,7 @@ dist
 
 # Prisma
 apps/api/prisma/migrations/
+apps/api/prisma/:memory:
 
 # Debug
 npm-debug.log*
