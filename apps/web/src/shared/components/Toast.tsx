@@ -9,6 +9,9 @@ import {
 	ToastQueue,
 	ToastTitle,
 } from "@heroui/react";
+import type { ComponentProps } from "react";
+
+type ToastItem = ComponentProps<typeof Toast>["toast"];
 
 /** Shared queue — toasts can be triggered from anywhere without prop drilling. */
 export const toastQueue = new ToastQueue({ maxVisibleToasts: 4 });
@@ -45,7 +48,7 @@ const textClass: Record<ToastVariant, string> = {
  * Uses semantic variant tokens so success/danger/warning each get
  * color-coded borders, backgrounds, and indicators automatically.
  */
-export function CustomToast({ toast: toastItem }: { toast: any }) {
+export function CustomToast({ toast: toastItem }: { toast: ToastItem }) {
 	const content = toastItem.content as ToastContentValue;
 	const variant = (content.variant as ToastVariant) ?? "default";
 
