@@ -1,6 +1,5 @@
 import Layout from "@/src/shared/components/layout";
 
-import RegisterForm from "../../register/components";
 import EventsSection from "./EventsSection";
 import HeroSection from "./HeroSection";
 import MenuSection from "./MenuSection";
@@ -21,9 +20,6 @@ export default function LandingPage() {
 			<EventsSection />
 
 			{/* Divider */}
-			<div className="w-full h-[2px] bg-accent" />
-
-			<RegisterForm />
 		</Layout>
 	);
 }
